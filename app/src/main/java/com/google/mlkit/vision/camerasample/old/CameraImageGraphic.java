@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample;
+package com.google.mlkit.vision.camerasample.old;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay;
 
 
 /** Draw camera image to background. */
@@ -33,6 +34,6 @@ public class CameraImageGraphic extends GraphicOverlay.Graphic {
 
   @Override
   public void draw(Canvas canvas) {
-    canvas.drawBitmap(bitmap, getTransformationMatrix(), null);
+    //canvas.drawBitmap(bitmap, getTransformationMatrix(), null);
   }
 }

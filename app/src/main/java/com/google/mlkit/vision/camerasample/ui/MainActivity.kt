@@ -1,4 +1,4 @@
-package com.google.mlkit.vision.camerasample
+package com.google.mlkit.vision.camerasample.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -14,6 +14,8 @@ import androidx.core.content.ContextCompat
 import java.util.concurrent.Executors
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import com.google.mlkit.vision.camerasample.R
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -223,7 +225,7 @@ class MainActivity : AppCompatActivity() {
 //                        faceGraphic.previewWidth = preview_view.width
 //                        faceGraphic.previewHeight = preview_view.height
 
-                        graphicOverlay?.add(FaceGraphic(graphicOverlay,face,resources))
+                  //      graphicOverlay?.add(FaceGraphic(graphicOverlay,face,resources))
                         val bounds = face.boundingBox
                         val rotY = face.headEulerAngleY // Head is rotated to the right rotY degrees
                         val rotZ = face.headEulerAngleZ // Head is tilted sideways rotZ degrees

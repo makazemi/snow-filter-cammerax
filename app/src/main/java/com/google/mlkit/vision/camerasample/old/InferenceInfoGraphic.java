@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample;
+package com.google.mlkit.vision.camerasample.old;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
 import androidx.annotation.Nullable;
+
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay;
 
 /** Graphic instance for rendering inference info (latency, FPS, resolution) in an overlay view. */
 public class InferenceInfoGraphic extends GraphicOverlay.Graphic {
@@ -44,7 +46,7 @@ public class InferenceInfoGraphic extends GraphicOverlay.Graphic {
     textPaint = new Paint();
     textPaint.setColor(TEXT_COLOR);
     textPaint.setTextSize(TEXT_SIZE);
-    postInvalidate();
+  //  postInvalidate();
   }
 
   @Override
@@ -52,11 +54,11 @@ public class InferenceInfoGraphic extends GraphicOverlay.Graphic {
     float x = TEXT_SIZE * 0.5f;
     float y = TEXT_SIZE * 1.5f;
 
-    canvas.drawText(
-        "InputImage size: " + overlay.getImageWidth() + "x" + overlay.getImageHeight(),
-        x,
-        y,
-        textPaint);
+//    canvas.drawText(
+//        "InputImage size: " + overlay.getImageWidth() + "x" + overlay.getImageHeight(),
+//        x,
+//        y,
+//        textPaint);
 
     // Draw FPS (if valid) and inference latency
     if (framesPerSecond != null) {

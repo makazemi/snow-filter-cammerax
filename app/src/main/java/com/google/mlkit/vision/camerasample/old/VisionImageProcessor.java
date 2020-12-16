@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample;
+package com.google.mlkit.vision.camerasample.old;
 
 import android.graphics.Bitmap;
 import android.os.Build.VERSION_CODES;
@@ -23,6 +23,7 @@ import androidx.annotation.RequiresApi;
 import androidx.camera.core.ImageProxy;
 
 import com.google.mlkit.common.MlKitException;
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay;
 
 import java.nio.ByteBuffer;
 
@@ -43,4 +44,5 @@ public interface VisionImageProcessor {
 
   /** Stops the underlying machine learning model and release resources. */
   void stop();
+
 }

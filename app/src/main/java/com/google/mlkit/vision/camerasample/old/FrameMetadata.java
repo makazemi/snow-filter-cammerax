@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample;
+package com.google.mlkit.vision.camerasample.old;
 
 /** Describing a frame info. */
 public class FrameMetadata {

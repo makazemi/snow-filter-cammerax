@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample;
+package com.google.mlkit.vision.camerasample.old;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;

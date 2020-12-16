@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample
+package com.google.mlkit.vision.camerasample.old
 
 import android.app.ActivityManager
 import android.content.Context
@@ -29,6 +29,7 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskExecutors
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay
 import com.google.mlkit.vision.camerasample.preference.PreferenceUtils
 import com.google.mlkit.vision.common.InputImage
 import java.nio.ByteBuffer
@@ -104,9 +105,9 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
   // -----------------Code for processing live preview frame from Camera1 API-----------------------
   @Synchronized
   override fun processByteBuffer(
-    data: ByteBuffer?,
-    frameMetadata: FrameMetadata?,
-    graphicOverlay: GraphicOverlay
+          data: ByteBuffer?,
+          frameMetadata: FrameMetadata?,
+          graphicOverlay: GraphicOverlay
   ) {
     latestImage = data
     latestImageMetaData = frameMetadata
@@ -127,9 +128,9 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
   }
 
   private fun processImage(
-    data: ByteBuffer,
-    frameMetadata: FrameMetadata,
-    graphicOverlay: GraphicOverlay
+          data: ByteBuffer,
+          frameMetadata: FrameMetadata,
+          graphicOverlay: GraphicOverlay
   ) {
     // If live viewport is on (that is the underneath surface view takes care of the camera preview
     // drawing), skip the unnecessary bitmap creation that used for the manual preview drawing.
@@ -176,10 +177,10 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
 
   // -----------------Common processing logic-------------------------------------------------------
   private fun requestDetectInImage(
-    image: InputImage,
-    graphicOverlay: GraphicOverlay,
-    originalCameraImage: Bitmap?,
-    shouldShowFps: Boolean
+          image: InputImage,
+          graphicOverlay: GraphicOverlay,
+          originalCameraImage: Bitmap?,
+          shouldShowFps: Boolean
   ): Task<T> {
     val startMs = SystemClock.elapsedRealtime()
     return detectInImage(image).addOnSuccessListener(executor) { results: T ->
@@ -249,6 +250,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     totalRunMs = 0
     fpsTimer.cancel()
   }
+
 
   protected abstract fun detectInImage(image: InputImage): Task<T>
 

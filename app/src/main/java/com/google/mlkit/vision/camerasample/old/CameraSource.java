@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample;
+package com.google.mlkit.vision.camerasample.old;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.common.images.Size;
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay;
 import com.google.mlkit.vision.camerasample.preference.PreferenceUtils;
 
 import java.io.IOException;

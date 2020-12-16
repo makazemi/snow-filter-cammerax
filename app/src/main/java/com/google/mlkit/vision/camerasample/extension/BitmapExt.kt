@@ -43,19 +43,6 @@ fun Bitmap.getBaseYByView(view: View, isHorizontalRotation: Boolean): Float {
     }
 }
 
-fun Bitmap.saveToGallery(context: Context) {
-    context.makeTempFile().apply {
-//        FileOutputStream(this).run {
-//            this@saveToGallery.compress(Bitmap.CompressFormat.JPEG, 100, this)
-//            flush()
-//            close()
-//        }
-        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also {
-            it.data = Uri.fromFile(this)
-            context.sendBroadcast(it)
-        }
-    }
-}
 fun Image.imageToBitmap(): Bitmap? {
     val buffer = this.planes[0].buffer
     val bytes = ByteArray(buffer.remaining())

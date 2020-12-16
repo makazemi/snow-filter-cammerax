@@ -52,7 +52,7 @@ public class PreferenceUtils {
   }
 
   @Nullable
-  public static com.google.mlkit.vision.camerasample.CameraSource.SizePair getCameraPreviewSizePair(Context context, int cameraId) {
+  public static com.google.mlkit.vision.camerasample.old.CameraSource.SizePair getCameraPreviewSizePair(Context context, int cameraId) {
     Preconditions.checkArgument(
         cameraId == CameraSource.CAMERA_FACING_BACK
             || cameraId == CameraSource.CAMERA_FACING_FRONT);
@@ -68,7 +68,7 @@ public class PreferenceUtils {
 
     try {
       SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-      return new com.google.mlkit.vision.camerasample.CameraSource.SizePair(
+      return new com.google.mlkit.vision.camerasample.old.CameraSource.SizePair(
           Size.parseSize(sharedPreferences.getString(previewSizePrefKey, null)),
           Size.parseSize(sharedPreferences.getString(pictureSizePrefKey, null)));
     } catch (Exception e) {

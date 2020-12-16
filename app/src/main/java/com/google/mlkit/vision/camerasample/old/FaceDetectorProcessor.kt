@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.camerasample
+package com.google.mlkit.vision.camerasample.old
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.vision.face.FaceDetector.ALL_LANDMARKS
+import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
@@ -30,10 +29,10 @@ import com.google.mlkit.vision.face.FaceLandmark
 import java.util.Locale
 
 /** Face Detector Demo.  */
-class FaceDetectorProcessor(private val context: Context, detectorOptions: FaceDetectorOptions?=null) :
+class FaceDetectorProcessor(private val context: Context,private val detectorOptions: FaceDetectorOptions?=null) :
         VisionProcessorBase<List<Face>>(context) {
 
-    private val detector: FaceDetector
+    private var detector: FaceDetector
 
     init {
         val options = detectorOptions
@@ -45,11 +44,9 @@ class FaceDetectorProcessor(private val context: Context, detectorOptions: FaceD
                         .setMinFaceSize(0.15f)
                         .enableTracking()
                         .build()
-
         detector = FaceDetection.getClient(options)
 
-        Log.v(MANUAL_TESTING_LOG, "Face detector options: $options")
-
+        Log.d(TAG,"init face detecoter")
     }
 
     override fun stop() {
@@ -58,12 +55,14 @@ class FaceDetectorProcessor(private val context: Context, detectorOptions: FaceD
     }
 
     override fun detectInImage(image: InputImage): Task<List<Face>> {
+        Log.d(TAG,"detect image")
         return detector.process(image)
     }
 
     override fun onSuccess(results: List<Face>, graphicOverlay: GraphicOverlay) {
+        Log.d(TAG,"onsuccess")
         for (face in results) {
-            graphicOverlay.add(OverlayView(graphicOverlay, face,context.resources))
+           // graphicOverlay.add(OverlayView(graphicOverlay, face,context.resources))
             logExtrasForTesting(face)
         }
     }
