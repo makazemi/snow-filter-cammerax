@@ -2,10 +2,7 @@ package com.google.mlkit.vision.camerasample.camerax
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.camera.core.CameraSelector
@@ -23,7 +20,23 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     lateinit var processBitmap: Bitmap
     lateinit var processCanvas: Canvas
 
+    private val DELAY = 5
+
+
+   // private val runnable = Runnable { invalidate() }
+
+//    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+//        super.onSizeChanged(w, h, oldw, oldh)
+//        if (w != oldw || h != oldh) {
+//            graphics.forEach{
+//                it.resize(w,h)
+//            }
+//        }
+//
+//    }
     abstract class Graphic(private val overlay: GraphicOverlay) {
+
+        abstract fun resize(width: Int, height: Int)
 
         abstract fun draw(canvas: Canvas?)
 
@@ -134,7 +147,11 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
                 it.draw(canvas)
                 it.draw(processCanvas)
             }
+
+
+          //handler.postDelayed(runnable,DELAY.toLong())
         }
     }
 
+    var overlayHandler=handler
 }

@@ -7,14 +7,15 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceContour
 
 class FaceContourGraphic(
-        overlay: GraphicOverlay,
-        private val face: Face,
-        private val imageRect: Rect
+    overlay: GraphicOverlay,
+    private val face: Face,
+    private val imageRect: Rect
 ) : GraphicOverlay.Graphic(overlay) {
 
     private val facePositionPaint: Paint
     private val idPaint: Paint
     private val boxPaint: Paint
+
 
     init {
         val selectedColor = Color.WHITE
@@ -30,6 +31,10 @@ class FaceContourGraphic(
         boxPaint.color = selectedColor
         boxPaint.style = Paint.Style.STROKE
         boxPaint.strokeWidth = BOX_STROKE_WIDTH
+    }
+
+
+    override fun resize(width: Int, height: Int) {
     }
 
     private fun Canvas.drawFace(facePosition: Int, @ColorInt selectedColor: Int) {
@@ -96,7 +101,11 @@ class FaceContourGraphic(
         canvas?.drawFace(FaceContour.LOWER_LIP_TOP, Color.YELLOW)
         canvas?.drawFace(FaceContour.UPPER_LIP_BOTTOM, Color.GREEN)
         canvas?.drawFace(FaceContour.UPPER_LIP_TOP, Color.CYAN)
+
+
     }
+
+
 
     companion object {
         private const val FACE_POSITION_RADIUS = 4.0f

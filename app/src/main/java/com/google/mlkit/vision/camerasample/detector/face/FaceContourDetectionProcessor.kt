@@ -12,7 +12,8 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import java.io.IOException
 
-class FaceContourDetectionProcessor(private val view: GraphicOverlay, private val context: Context) :
+class FaceContourDetectionProcessor(private val view: GraphicOverlay, private val context: Context
+) :
     BaseImageAnalyzer<List<Face>>() {
 
     private val realTimeOpts = FaceDetectorOptions.Builder()
@@ -47,6 +48,8 @@ class FaceContourDetectionProcessor(private val view: GraphicOverlay, private va
             val faceGraphic = FaceContourGraphic(graphicOverlay, it, rect)
             graphicOverlay.add(faceGraphic)
         }
+     //   graphicOverlay.add(SnowFlakeGraphic(graphicOverlay))
+        Log.d(TAG,"onSuccess")
         graphicOverlay.postInvalidate()
     }
 

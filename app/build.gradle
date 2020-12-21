@@ -79,13 +79,15 @@ dependencies {
 
 
     // Object detection feature with bundled default classifier
-    implementation 'com.google.mlkit:object-detection:16.2.1'
+    implementation 'com.google.mlkit:object-detection:16.2.2'
 
     // Object detection feature with custom classifier support
-    implementation 'com.google.mlkit:object-detection-custom:16.2.1'
+    implementation 'com.google.mlkit:object-detection-custom:16.3.0'
 
     // Pose detection with default models
     implementation 'com.google.mlkit:pose-detection:17.0.0'
     // Pose detection with accurate models
     implementation 'com.google.mlkit:pose-detection-accurate:17.0.0'
+
+    implementation 'com.plattysoft.leonids:LeonidsLib:1.3.2'
 }

@@ -68,4 +68,9 @@ public class InferenceInfoGraphic extends GraphicOverlay.Graphic {
       canvas.drawText("Latency: " + latency + " ms", x, y + TEXT_SIZE, textPaint);
     }
   }
+
+  @Override
+  public void resize(int width, int height) {
+
+  }
 }

@@ -1,4 +1,4 @@
-package com.google.mlkit.vision.camerasample
+package com.google.mlkit.vision.camerasample.extension
 
 import android.app.Activity
 import android.content.ContentValues

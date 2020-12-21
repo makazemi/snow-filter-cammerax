@@ -1,9 +1,11 @@
 package com.google.mlkit.vision.camerasample.camerax
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.ScaleGestureDetector
+import android.view.ViewGroup
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -21,22 +23,24 @@ class CameraManager(
     private val finderView: PreviewView,
     private val lifecycleOwner: LifecycleOwner,
     private val graphicOverlay: GraphicOverlay
+
 ) {
 
     private var preview: Preview? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var imageAnalyzer: ImageAnalysis? = null
-    private var screenAspectRatio: Int? = null
+
 
     // default barcode scanner
-    private var analyzerVisionType: VisionType = VisionType.Barcode
+    private var analyzerVisionType: VisionType = VisionType.NONE
 
     lateinit var cameraExecutor: ExecutorService
     lateinit var imageCapture: ImageCapture
     lateinit var metrics: DisplayMetrics
 
-    var rotation: Float = 0f
+    var rotation = 0F
+    private var targetRotation=0
     var cameraSelectorOption = CameraSelector.LENS_FACING_BACK
 
     init {
@@ -60,13 +64,23 @@ class CameraManager(
     ) {
         try {
             cameraProvider?.unbindAll()
-            camera = cameraProvider?.bindToLifecycle(
-                lifecycleOwner,
-                cameraSelector,
-                preview,
-                imageCapture,
-                imageAnalyzer
-            )
+            if(analyzerVisionType==VisionType.NONE) {
+                cameraProvider?.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture
+                )
+            }
+            else {
+                camera = cameraProvider?.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture,
+                    imageAnalyzer
+                )
+            }
             preview?.setSurfaceProvider(
                 finderView.surfaceProvider
             )
@@ -75,6 +89,7 @@ class CameraManager(
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setUpPinchToZoom() {
         val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
@@ -104,28 +119,32 @@ class CameraManager(
     fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener(
-            Runnable {
+            {
                 cameraProvider = cameraProviderFuture.get()
                 preview = Preview.Builder().build()
 
-                imageAnalyzer = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-                    .also {
-                        it.setAnalyzer(cameraExecutor, selectAnalyzer())
-                    }
+                if(analyzerVisionType!=VisionType.NONE) {
+                    imageAnalyzer = ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build()
+                        .also {
+                            it.setAnalyzer(cameraExecutor, selectAnalyzer())
+                        }
 
+                    Log.d(TAG,"vision type!=none")
+                }
                 val cameraSelector = CameraSelector.Builder()
                     .requireLensFacing(cameraSelectorOption)
                     .build()
 
-                metrics =  DisplayMetrics().also { finderView.display.getRealMetrics(it) }
-                screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
+            //    metrics =  DisplayMetrics().also { finderView.display.getRealMetrics(it) }
+               // val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
 
                 imageCapture =
                     ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                        .setTargetAspectRatio(screenAspectRatio!!)
+                        .setTargetRotation(targetRotation)
+                       // .setTargetAspectRatio(screenAspectRatio)
                         .build()
 
                 setUpPinchToZoom()
@@ -158,6 +177,12 @@ class CameraManager(
 
     fun isFrontMode() : Boolean {
         return cameraSelectorOption == CameraSelector.LENS_FACING_FRONT
+    }
+
+    fun setTargetRotation(rotation:Int){
+        targetRotation=rotation
+        imageCapture.targetRotation=rotation
+        imageAnalyzer?.targetRotation=rotation
     }
 
     companion object {

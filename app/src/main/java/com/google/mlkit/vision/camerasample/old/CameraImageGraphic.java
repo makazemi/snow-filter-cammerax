@@ -36,4 +36,9 @@ public class CameraImageGraphic extends GraphicOverlay.Graphic {
   public void draw(Canvas canvas) {
     //canvas.drawBitmap(bitmap, getTransformationMatrix(), null);
   }
+
+  @Override
+  public void resize(int width, int height) {
+
+  }
 }
