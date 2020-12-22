@@ -14,8 +14,10 @@ import timber.log.Timber
 const val TAG="SnowGraphicOverlay"
 class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    private val NUM_SNOWFLAKES = 300
-    private val DELAY = 5
+    companion object{
+        private const val NUM_SNOWFLAKES = 300
+        private const val DELAY = 5
+    }
 
     private var snowflakes = ArrayList<SnowFlake>()
 
@@ -23,6 +25,9 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
     private val runnable = Runnable { invalidate() }
 
     private val snowmanBitmap = BitmapFactory.decodeResource(resources, R.drawable.snowman)
+    private val grassBitmap=BitmapFactory.decodeResource(resources,R.drawable.grass)
+    private val grassRotatedBitmap=BitmapFactory.decodeResource(resources,R.drawable.grass90)
+    private var grass:Bitmap=grassBitmap
     private val snowFlakeBitmap = AppCompatResources.getDrawable(context!!, R.drawable.ic_freezing)?.toBitmap()
 
 
@@ -33,11 +38,19 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
 
     private var factorW: Int
 
+    private var heightGrass:Int
+
+    private var factorHGrass:Int
+
     private var bottomSnowman: Int
 
     private var topSnowman: Int
 
     private var rectSnowman: Rect
+
+    private var rectGrass:Rect
+
+    private var paint:Paint
 
     lateinit var processBitmap: Bitmap
     lateinit var processCanvas: Canvas
@@ -54,14 +67,12 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
                     in 225 until 315 -> 90
                     else -> 0
                 }
+                //Timber.d("OrientationEventListener=$rotation")
             if(currentRotation!=rotation){
-                Timber.d("OrientationEventListener=$rotation")
-              //  processCanvas.rotate(rotation.toFloat())
                 if(rotation==270 || rotation==90) {
-                    resize(height, width)
-                    Timber.d("width=$width, height=$height")
+                    resize(height, width,rotation)
                 }else{
-                    resize(width,height)
+                    resize(width,height,rotation)
                 }
             }
 
@@ -77,24 +88,37 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
         bottomSnowman = height - offset
         topSnowman = height - factorH
         rectSnowman = Rect(0, topSnowman, factorW, bottomSnowman)
+        factorHGrass=height/10
+        heightGrass=height-factorHGrass
+        rectGrass=Rect(0,heightGrass,width,height)
+        paint=Paint().apply { color=Color.YELLOW }
         orientationEventListener.enable()
-
-
     }
 
 
 
-    private fun resize(width: Int, height: Int) {
+    private fun resize(newWidth: Int, newHeight: Int,rotation:Int=0) {
         if(snowflakes.isEmpty()){
             for (i in 0 until NUM_SNOWFLAKES) {
-                snowflakes.add(SnowFlake.create(width, height,snowFlakeBitmap))
+                snowflakes.add(SnowFlake.create(newWidth, newHeight,snowFlakeBitmap))
             }
         }
-        factorH = height / 4
-        factorW = width / 4
-        bottomSnowman = height - offset
-        topSnowman = height - factorH
+        factorH = newHeight / 4
+        factorW = newWidth / 4
+        bottomSnowman = newHeight - offset
+        topSnowman = newHeight - factorH
         rectSnowman = Rect(0, topSnowman, factorW, bottomSnowman)
+        factorHGrass=newHeight/10
+        heightGrass=newHeight-factorHGrass
+        Timber.d("currenroa=$currentRotation")
+        if(rotation==90 || rotation==270){
+            rectGrass=Rect(0,0,height/10,height)
+            grass=grassRotatedBitmap
+        }
+        else{
+            rectGrass=Rect(0,height-height/10,width,height)
+            grass=grassBitmap
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -114,14 +138,20 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
         super.onDraw(canvas)
         initProcessCanvas()
         canvas?.drawBitmap(snowmanBitmap, null, rectSnowman, null)
+        canvas?.drawBitmap(grass, null, rectGrass, null)
+       // canvas?.drawRect(rectGrass,paint)
         processCanvas.drawBitmap(snowmanBitmap, null, rectSnowman, null)
-        for (snowFlakeme in snowflakes) {
-            snowFlakeme.draw(canvas)
-            snowFlakeme.draw(processCanvas)
+        for (snowFlake in snowflakes) {
+            snowFlake.draw(canvas)
+            snowFlake.draw(processCanvas)
         }
         handler.postDelayed(runnable, DELAY.toLong())
     }
 
 
-
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        orientationEventListener.disable()
+        Timber.d("ondetach")
+    }
 }
