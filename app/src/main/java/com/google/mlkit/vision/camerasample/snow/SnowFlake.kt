@@ -18,7 +18,9 @@ class SnowFlake internal constructor(
                 + OFFSET, position.y + OFFSET
     )
 
-    private val probabilityBitmap=random.getRandom(25)
+    private val probabilityBitmap = random.getRandom(25)
+
+
 
     init {
         paint.color = Color.WHITE
@@ -57,15 +59,15 @@ class SnowFlake internal constructor(
             val height = ca.height
             move(width, height)
 
-            if(probabilityBitmap==0 && snowFlakeBitmap!=null){
-                ca.drawBitmap(snowFlakeBitmap,position.x.toFloat(),position.y.toFloat(),null)
-            }
-            else {
+            if (probabilityBitmap == 0 && snowFlakeBitmap != null) {
+                ca.drawBitmap(snowFlakeBitmap, position.x.toFloat(), position.y.toFloat(), null)
+            } else {
                 ca.drawCircle(position.x.toFloat(), position.y.toFloat(), flakeSize, paint)
             }
         }
 
     }
+
 
     companion object {
         private const val ANGE_RANGE = 0.1f
@@ -76,8 +78,8 @@ class SnowFlake internal constructor(
         private const val INCREMENT_LOWER = 2f
         private const val OFFSET = 10
         private const val INCREMENT_UPPER = 4f
-        private const val FLAKE_SIZE_LOWER = 3f
-        private const val FLAKE_SIZE_UPPER = 10f
+        private const val FLAKE_SIZE_LOWER = 2f
+        private const val FLAKE_SIZE_UPPER = 6f
         fun create(width: Int, height: Int, bitmap: Bitmap?): SnowFlake {
             val random = Random()
             val x = random.getRandom(width)

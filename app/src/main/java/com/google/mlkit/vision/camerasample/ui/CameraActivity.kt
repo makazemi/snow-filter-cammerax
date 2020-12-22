@@ -26,6 +26,7 @@ import com.google.mlkit.vision.camerasample.databinding.ActivityMainBinding
 import com.google.mlkit.vision.camerasample.extension.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import javax.inject.Inject
 
 
 @KeepName
@@ -47,6 +48,8 @@ class CameraActivity :
 
 
     private lateinit var cameraManager: CameraManager
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +112,9 @@ class CameraActivity :
         }
 
 
+        cameraManager.setCameraSwitchButtonListener {
+
+        }
     }
 
     private fun setUpSnowEffect() {
@@ -202,8 +208,9 @@ class CameraActivity :
         }
     }
 
+
     private fun imageToBitmapSaveGallery(image: Image) {
-        Log.d(TAG,"rotation=${cameraManager.rotation}")
+        Log.d(TAG,"rotation=${cameraManager.targetRotation}")
         Log.d(TAG,"ishorizontalmode=${cameraManager.isHorizontalMode()}")
         image.imageToBitmap()?.let { bitmap ->
 
@@ -237,7 +244,7 @@ class CameraActivity :
         override fun onDisplayChanged(displayId: Int) {
             if (binding.rootView.display.displayId == displayId) {
                 val rotation = binding.rootView.display.rotation
-               cameraManager.setTargetRotation(rotation)
+               cameraManager.targetRotation=rotation
                 Log.d(TAG,"ondispalchange=$rotation")
             }
         }
@@ -251,13 +258,13 @@ class CameraActivity :
 
     override fun onStart() {
         super.onStart()
-        val displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
-        displayManager.registerDisplayListener(displayListener, null)
+       // val displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+       // displayManager.registerDisplayListener(displayListener, null)
     }
     override fun onStop() {
         super.onStop()
-        val displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
-        displayManager.unregisterDisplayListener(displayListener)
+        //val displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        //displayManager.unregisterDisplayListener(displayListener)
     }
 
     companion object {

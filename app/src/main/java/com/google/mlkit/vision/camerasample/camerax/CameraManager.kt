@@ -5,13 +5,15 @@ import android.content.Context
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.ScaleGestureDetector
-import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.google.mlkit.vision.camerasample.R
 import com.google.mlkit.vision.camerasample.detector.face.FaceContourDetectionProcessor
+import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
@@ -37,11 +39,17 @@ class CameraManager(
 
     lateinit var cameraExecutor: ExecutorService
     lateinit var imageCapture: ImageCapture
-    lateinit var metrics: DisplayMetrics
 
-    var rotation = 0F
-    private var targetRotation=0
+
+   // var rotation: Float = 0F
+     var targetRotation=0
     var cameraSelectorOption = CameraSelector.LENS_FACING_BACK
+
+    private lateinit var cameraSwitchButtonListener: (isEnable:Boolean) -> Unit
+
+    fun setCameraSwitchButtonListener(callback: (isEnable:Boolean) -> Unit) {
+        this.cameraSwitchButtonListener = callback
+    }
 
     init {
         createNewExecutor()
@@ -85,7 +93,7 @@ class CameraManager(
                 finderView.surfaceProvider
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Use case binding failed", e)
+            Timber.d( "Use case binding failed=$e")
         }
     }
 
@@ -120,12 +128,20 @@ class CameraManager(
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener(
             {
+                val metrics = DisplayMetrics().also { finderView.display.getRealMetrics(it) }
+                val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
+
                 cameraProvider = cameraProviderFuture.get()
-                preview = Preview.Builder().build()
+                preview = Preview.Builder()
+                  //  .setTargetRotation(targetRotation)
+                 //   .setTargetAspectRatio(screenAspectRatio)
+                    .build()
 
                 if(analyzerVisionType!=VisionType.NONE) {
                     imageAnalyzer = ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .setTargetRotation(targetRotation)
+                        .setTargetAspectRatio(screenAspectRatio)
                         .build()
                         .also {
                             it.setAnalyzer(cameraExecutor, selectAnalyzer())
@@ -137,17 +153,18 @@ class CameraManager(
                     .requireLensFacing(cameraSelectorOption)
                     .build()
 
-            //    metrics =  DisplayMetrics().also { finderView.display.getRealMetrics(it) }
-               // val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
 
                 imageCapture =
                     ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                         .setTargetRotation(targetRotation)
-                       // .setTargetAspectRatio(screenAspectRatio)
+                        .setTargetAspectRatio(screenAspectRatio)
                         .build()
 
                 setUpPinchToZoom()
+
+                cameraSwitchButtonListener(updateCameraSwitchButton())
+
                 setCameraConfig(cameraProvider, cameraSelector)
 
             }, ContextCompat.getMainExecutor(context)
@@ -172,18 +189,36 @@ class CameraManager(
     }
 
     fun isHorizontalMode() : Boolean {
-        return rotation == 90f || rotation == 270f
+        return targetRotation == 90 || targetRotation == 270
     }
 
     fun isFrontMode() : Boolean {
         return cameraSelectorOption == CameraSelector.LENS_FACING_FRONT
     }
 
-    fun setTargetRotation(rotation:Int){
-        targetRotation=rotation
-        imageCapture.targetRotation=rotation
-        imageAnalyzer?.targetRotation=rotation
+//    fun setTargetRotation(rotation:Int){
+//        targetRotation=rotation
+//    }
+
+    /** Enabled or disabled a button to switch cameras depending on the available cameras */
+    private fun updateCameraSwitchButton():Boolean{
+        return try {
+            hasBackCamera() && hasFrontCamera()
+        } catch (exception: CameraInfoUnavailableException) {
+            false
+        }
     }
+
+    /** Returns true if the device has an available back camera. False otherwise */
+    private fun hasBackCamera(): Boolean {
+        return cameraProvider?.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) ?: false
+    }
+
+    /** Returns true if the device has an available front camera. False otherwise */
+    private fun hasFrontCamera(): Boolean {
+        return cameraProvider?.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
+    }
+
 
     companion object {
         private const val RATIO_4_3_VALUE = 4.0 / 3.0

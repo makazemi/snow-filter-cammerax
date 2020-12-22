@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.fragment.app.Fragment
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -38,6 +39,38 @@ import java.io.OutputStream
             values.put(MediaStore.Images.Media.DATA, file.absolutePath)
             // .DATA is deprecated in API 29
             contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        }
+    }
+}
+
+fun Fragment.saveImage(bitmap: Bitmap, folderName: String) {
+    if (android.os.Build.VERSION.SDK_INT >= 29) {
+        val values = contentValues()
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/$folderName")
+        values.put(MediaStore.Images.Media.IS_PENDING, true)
+        // RELATIVE_PATH and IS_PENDING are introduced in API 29.
+
+        val uri: Uri? = requireActivity().contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        if (uri != null) {
+            saveImageToStream(bitmap,requireActivity().contentResolver.openOutputStream(uri))
+            values.put(MediaStore.Images.Media.IS_PENDING, false)
+            requireActivity().contentResolver.update(uri, values, null, null)
+        }
+    } else {
+        val directory = File(Environment.getExternalStorageDirectory().toString() + File.separator + folderName)
+        // getExternalStorageDirectory is deprecated in API 29
+
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+        val fileName = System.currentTimeMillis().toString() + ".png"
+        val file = File(directory, fileName)
+        saveImageToStream(bitmap, FileOutputStream(file))
+        if (file.absolutePath != null) {
+            val values = contentValues()
+            values.put(MediaStore.Images.Media.DATA, file.absolutePath)
+            // .DATA is deprecated in API 29
+            requireActivity().contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         }
     }
 }
