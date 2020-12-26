@@ -2,16 +2,21 @@ package com.google.mlkit.vision.camerasample.extension
 
 import android.app.Activity
 import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.fragment.app.Fragment
+import com.google.mlkit.vision.camerasample.R
+import com.google.mlkit.vision.camerasample.ui.fragments.CameraFragment
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
- fun Activity.saveImage(bitmap: Bitmap, folderName: String) {
+fun Activity.saveImage(bitmap: Bitmap, folderName: String) {
     if (android.os.Build.VERSION.SDK_INT >= 29) {
         val values = contentValues()
         values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/$folderName")
@@ -57,14 +62,17 @@ fun Fragment.saveImage(bitmap: Bitmap, folderName: String) {
             requireActivity().contentResolver.update(uri, values, null, null)
         }
     } else {
-        val directory = File(Environment.getExternalStorageDirectory().toString() + File.separator + folderName)
+      //  val directory = File(Environment.getExternalStorageDirectory().toString() + File.separator + folderName)
         // getExternalStorageDirectory is deprecated in API 29
 
-        if (!directory.exists()) {
-            directory.mkdirs()
-        }
+//        if (!directory.exists()) {
+//            directory.mkdirs()
+//        }
         val fileName = System.currentTimeMillis().toString() + ".png"
-        val file = File(directory, fileName)
+        //val file = File(directory, fileName)
+        val file=getOutputDirectory().createFile(
+            CameraFragment.FILENAME,
+            CameraFragment.PHOTO_EXTENSION)
         saveImageToStream(bitmap, FileOutputStream(file))
         if (file.absolutePath != null) {
             val values = contentValues()
@@ -93,3 +101,14 @@ private fun saveImageToStream(bitmap: Bitmap, outputStream: OutputStream?) {
         }
     }
 }
+
+fun Fragment.getOutputDirectory(): File {
+    val appContext = requireContext().applicationContext
+    val mediaDir = requireContext().externalMediaDirs.firstOrNull()?.let {
+        File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() } }
+    return if (mediaDir != null && mediaDir.exists())
+        mediaDir else appContext.filesDir
+}
+fun File.createFile(format: String, extension: String) =
+    File(this, SimpleDateFormat(format, Locale.US)
+        .format(System.currentTimeMillis()) + extension)

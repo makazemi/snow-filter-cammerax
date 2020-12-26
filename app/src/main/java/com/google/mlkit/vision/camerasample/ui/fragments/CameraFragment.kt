@@ -19,25 +19,20 @@ package com.google.mlkit.vision.camerasample.ui.fragments
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.*
-import android.graphics.drawable.ColorDrawable
 import android.hardware.Camera
 import android.media.Image
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.webkit.MimeTypeMap
 import android.widget.ImageButton
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.withSave
-import androidx.core.graphics.withScale
 import androidx.core.net.toFile
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
@@ -54,7 +49,6 @@ import com.google.mlkit.vision.camerasample.camerax.CameraManager
 import com.google.mlkit.vision.camerasample.databinding.FragmentCameraBinding
 import com.google.mlkit.vision.camerasample.extension.*
 import com.google.mlkit.vision.camerasample.ui.CameraViewModel
-import com.google.mlkit.vision.camerasample.ui.ImageCaptureActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -98,12 +92,15 @@ class CameraFragment : Fragment() {
                 }
                 val rotation = when (orientation) {
                     in 45 until 135 -> 270
-                    in 135 until 225 -> 180
+                    in 135 until 225 -> 0
                     in 225 until 315 -> 90
                     else -> 0
                 }
-                cameraManager.targetRotation=rotation
+          //      cameraManager.targetRotation=rotation
                 targetRotation=rotation
+
+             //   Timber.d("oritaina on oredinalie=$orientation")
+           //     Timber.d("rotation on oredinalie=$rotation")
 
             }
         }
@@ -133,7 +130,7 @@ class CameraFragment : Fragment() {
             this,
             binding.graphicOverlay
         )
-        outputDirectory = ImageCaptureActivity.getOutputDirectory(requireContext())
+        outputDirectory = getOutputDirectory()
 
         // Wait for the views to be properly laid out
         binding.viewFinder.post {
@@ -242,7 +239,6 @@ class CameraFragment : Fragment() {
 
     private fun takePhoto(){
         // Get a stable reference of the modifiable image capture use case
-
         cameraManager.imageCapture.let {
             it.takePicture(
                 ContextCompat.getMainExecutor(requireContext()),
@@ -277,6 +273,10 @@ class CameraFragment : Fragment() {
 //            }
         }
 
+
+    }
+
+    fun saveImage(bitmap: Bitmap){
 
     }
 
@@ -357,37 +357,46 @@ class CameraFragment : Fragment() {
        targetRotation.toFloat(),
         cameraManager.isFrontMode()
         )
-            ?.scaleImage(
-                binding.viewFinder,
-                cameraManager.isHorizontalMode()
-            )
+//            ?.scaleImage(
+//                binding.snowView.processCanvas,
+//                false
+//            )
         ?.let { bitmap ->
             val canvas=binding.snowView.processCanvas
-         //   val rect=Rect(0,0,canvas.width,canvas.height)
-         //   canvas.rotate(cameraManager.targetRotation.toFloat())
-           // canvas.drawBitmap(tempBitmap,null,rect,null)
-            canvas.withScale {  }
-            canvas.drawBitmap(
-                bitmap,
-                0f,
-                bitmap.getBaseYByView(
-                    view = binding.snowView,
-                    isHorizontalRotation = cameraManager.isHorizontalMode()
-                ),
-                Paint().apply {
-                    xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER)
-                }
-            )
+            val realRotation = when (targetRotation.toFloat()) {
+                0f -> 90f
+                90f -> 0f
+                180f -> 270f
+                else -> 180f
+            }
 
-            saveImage(binding.snowView.processBitmap, getString(R.string.app_name))
+         //   canvas.rotate(realRotation)
+        //    canvas.scaleImage(binding.viewFinder,cameraManager.isHorizontalMode())
+//            canvas.drawBitmap(
+//                bitmap,
+//                0f,
+//                bitmap.getBaseYByView(
+//                    view = binding.snowView,
+//                    isHorizontalRotation = cameraManager.isHorizontalMode()
+//                ),
+//                Paint().apply {
+//                    xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER)
+//                }
+//            )
+
+            lifecycleScope.launch(Dispatchers.IO){
+                saveImage(bitmap, getString(R.string.app_name))
+
+            }
+            setGalleryThumbnail(bitmap)
 
             Timber.d("rotated image=$bitmap")
 
             // We can only change the foreground Drawable using API level 23+ API
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // Update the gallery thumbnail with latest picture taken
-                setGalleryThumbnail(binding.snowView.processBitmap)
-            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                // Update the gallery thumbnail with latest picture taken
+//                setGalleryThumbnail(binding.snowView.processBitmap)
+//            }
 
         }
     }
@@ -434,8 +443,8 @@ class CameraFragment : Fragment() {
     }
 
     companion object {
-        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val PHOTO_EXTENSION = ".jpg"
+         const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
+         const val PHOTO_EXTENSION = ".jpg"
 
         /** Helper function used to create a timestamped file */
         private fun createFile(baseFolder: File, format: String, extension: String) =

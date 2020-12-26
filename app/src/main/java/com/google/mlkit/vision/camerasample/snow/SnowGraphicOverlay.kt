@@ -68,15 +68,16 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
                     else -> 0
                 }
                 //Timber.d("OrientationEventListener=$rotation")
-            if(currentRotation!=rotation){
-                if(rotation==270 || rotation==90) {
-                    resize(height, width,rotation)
-                }else{
-                    resize(width,height,rotation)
-                }
-            }
+//            if(currentRotation!=rotation){
+//                if(rotation==270 || rotation==90) {
+//                    resize(height, width,rotation)
+//                }else{
+//                    resize(width,height,rotation)
+//                }
+//                currentRotation=rotation
+//            }
 
-                currentRotation=rotation
+
 
             }
         }
@@ -103,13 +104,13 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
                 snowflakes.add(SnowFlake.create(newWidth, newHeight,snowFlakeBitmap))
             }
         }
-        factorH = newHeight / 4
-        factorW = newWidth / 4
-        bottomSnowman = newHeight - offset
-        topSnowman = newHeight - factorH
-        rectSnowman = Rect(0, topSnowman, factorW, bottomSnowman)
-        factorHGrass=newHeight/10
-        heightGrass=newHeight-factorHGrass
+//        factorH = newHeight / 4
+//        factorW = newWidth / 4
+//        bottomSnowman = newHeight - offset
+//        topSnowman = newHeight - factorH
+//        rectSnowman = Rect(0, topSnowman, factorW, bottomSnowman)
+//        factorHGrass=newHeight/10
+//        heightGrass=newHeight-factorHGrass
         Timber.d("currenroa=$currentRotation")
         if(rotation==90 || rotation==270){
             rectGrass=Rect(0,0,height/10,height)
@@ -139,12 +140,14 @@ class SnowGraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context
         initProcessCanvas()
         canvas?.drawBitmap(snowmanBitmap, null, rectSnowman, null)
         canvas?.drawBitmap(grass, null, rectGrass, null)
-       // canvas?.drawRect(rectGrass,paint)
         processCanvas.drawBitmap(snowmanBitmap, null, rectSnowman, null)
+        processCanvas.drawBitmap(grass,null,rectGrass,null)
+
         for (snowFlake in snowflakes) {
             snowFlake.draw(canvas)
             snowFlake.draw(processCanvas)
         }
+        //processCanvas.rotate(currentRotation.toFloat())
         handler.postDelayed(runnable, DELAY.toLong())
     }
 

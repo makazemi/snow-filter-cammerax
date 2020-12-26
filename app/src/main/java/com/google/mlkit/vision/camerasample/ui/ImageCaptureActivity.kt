@@ -2,9 +2,13 @@ package com.google.mlkit.vision.camerasample.ui
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.Window.FEATURE_NO_TITLE
+import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.activity.viewModels
 import com.google.mlkit.vision.camerasample.R
 import com.google.mlkit.vision.camerasample.databinding.ActivityImageCaptureBinding
@@ -30,8 +34,8 @@ class ImageCaptureActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Before setting full screen flags, we must wait a bit to let UI settle; otherwise, we may
-        // be trying to set app to immersive mode before it's ready and the flags do not stick
+//         Before setting full screen flags, we must wait a bit to let UI settle; otherwise, we may
+//         be trying to set app to immersive mode before it's ready and the flags do not stick
         binding.root.postDelayed({
             binding.root.systemUiVisibility = FLAGS_FULLSCREEN
         }, IMMERSIVE_FLAG_TIMEOUT)

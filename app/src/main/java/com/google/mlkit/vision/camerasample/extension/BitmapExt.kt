@@ -1,5 +1,6 @@
 package com.google.mlkit.vision.camerasample.extension
 
+
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.graphics.Bitmap
@@ -12,18 +13,18 @@ import android.graphics.drawable.VectorDrawable
 import android.media.Image
 import android.os.Build
 import android.view.View
+import timber.log.Timber
+
 
 fun Bitmap.rotateFlipImage(degree: Float, isFrontMode: Boolean): Bitmap? {
     val realRotation = when (degree) {
         0f -> 90f
-        90f -> 0f
-        180f -> 270f
-        else -> 180f
+        else ->degree
     }
     val matrix = Matrix().apply {
-        if (isFrontMode) {
-            preScale(-1.0f, 1.0f)
-        }
+//        if (isFrontMode) {
+//            preScale(1.0f, -1.0f)
+//        }
         postRotate(realRotation)
     }
     return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
@@ -38,7 +39,21 @@ fun Bitmap.scaleImage(view: View, isHorizontalRotation: Boolean): Bitmap? {
         false -> Bitmap.createScaledBitmap(this, view.width, view.height, false)
     }
 }
+fun Bitmap.scaleImage(view: Canvas, isHorizontalRotation: Boolean): Bitmap? {
+    val ratio = width.toFloat() / height.toFloat()
+    val newHeight = (view.height * ratio).toInt()
+    Timber.d("ratio=$ratio,newheight=$newHeight")
+    return Bitmap.createScaledBitmap(this, view.width, newHeight, false)
+}
+fun Canvas.scaleImage(view: View, isHorizontalRotation: Boolean) {
+    val ratio = view.width.toFloat() / view.height.toFloat()
+    val newHeight = (view.width * ratio).toInt()
 
+     when (isHorizontalRotation) {
+         true -> this.scale(view.width.toFloat(), newHeight.toFloat())
+         false -> this.scale(view.width.toFloat(), view.height.toFloat())
+    }
+}
 fun Bitmap.getBaseYByView(view: View, isHorizontalRotation: Boolean): Float {
     return when (isHorizontalRotation) {
         true -> (view.height.toFloat() / 2) - (this.height.toFloat() / 2)

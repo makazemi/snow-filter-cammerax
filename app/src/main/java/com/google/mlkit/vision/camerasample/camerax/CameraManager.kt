@@ -133,14 +133,14 @@ class CameraManager(
 
                 cameraProvider = cameraProviderFuture.get()
                 preview = Preview.Builder()
-                  //  .setTargetRotation(targetRotation)
+                   // .setTargetRotation(targetRotation)
                  //   .setTargetAspectRatio(screenAspectRatio)
                     .build()
 
                 if(analyzerVisionType!=VisionType.NONE) {
                     imageAnalyzer = ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .setTargetRotation(targetRotation)
+                      //  .setTargetRotation(targetRotation)
                         .setTargetAspectRatio(screenAspectRatio)
                         .build()
                         .also {
@@ -157,7 +157,7 @@ class CameraManager(
                 imageCapture =
                     ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                        .setTargetRotation(targetRotation)
+                       // .setTargetRotation(targetRotation)
                         .setTargetAspectRatio(screenAspectRatio)
                         .build()
 
