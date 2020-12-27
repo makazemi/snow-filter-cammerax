@@ -2,7 +2,6 @@ package com.google.mlkit.vision.camerasample.snow
 
 import android.content.res.Resources
 import android.graphics.*
-import android.os.Handler
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import com.google.mlkit.vision.camerasample.R
@@ -24,16 +23,18 @@ class SnowGraphic(private val overlay: GraphicOverlay, resources: Resources) :
 
     private val runnable = Runnable { overlay.invalidate() }
 
-    private val snowmanBitmap = BitmapFactory.decodeResource(resources, R.drawable.snowman)
-    private val grassBitmap = BitmapFactory.decodeResource(resources, R.drawable.grass)
 
-    private val storyBitmap =AppCompatResources.getDrawable(overlay.context, R.drawable.ic_story)?.toBitmap()
-    private var grass: Bitmap = grassBitmap
+    private val snowStoryBitmapPortrait =
+        BitmapFactory.decodeResource(resources, R.drawable.snow_story)
+    private val snowStoryBitmapLandscape =
+        BitmapFactory.decodeResource(resources, R.drawable.snow_story_land)
+    private var snowBitmap = snowStoryBitmapPortrait
+
     private val snowFlakeBitmap =
         AppCompatResources.getDrawable(overlay.context, R.drawable.ic_freezing)?.toBitmap()
 
 
-    private val offset = 10
+    private val offset = 100
 
     private var factorH: Int
 
@@ -47,9 +48,8 @@ class SnowGraphic(private val overlay: GraphicOverlay, resources: Resources) :
 
     private var topSnowman: Int
 
-    private var rectSnowman: Rect
 
-    private var rectGrass: Rect
+    private var rectBitmap: Rect
 
     private var paint: Paint
 
@@ -63,49 +63,64 @@ class SnowGraphic(private val overlay: GraphicOverlay, resources: Resources) :
         height = overlay.height
 
         factorW = width / 4
-        factorH=height/4
+        factorH = height / 2
         bottomSnowman = height - offset
         topSnowman = height - factorH
-        rectSnowman = Rect(0, topSnowman, factorW, bottomSnowman)
+
         factorHGrass = height / 10
         heightGrass = height - factorHGrass
-        rectGrass = Rect(0, topSnowman, width, height)
+        rectBitmap = Rect(0, topSnowman, width, height)
         paint = Paint().apply { color = Color.YELLOW }
 
         Timber.d("overlaywidth=${width} height=${height}")
         Timber.d("topsnowman=$topSnowman, right=$factorH, bottom=$bottomSnowman")
-        resize()
 
+        createSnowFlake()
     }
 
-    private fun resize() {
+    private fun createSnowFlake() {
         if (snowflakes.isEmpty()) {
             for (i in 0 until NUM_SNOWFLAKES) {
-                snowflakes.add(SnowFlake.create(overlay?.width ?: 0,
-                    overlay?.height ?: 0,
+                snowflakes.add(SnowFlake.create(width,
+                    height,
                     snowFlakeBitmap))
             }
         }
 
-        //    rectGrass=Rect(0,overlay?.height?:0-(overlay?.height?:0/10),overlay?.width?:0,overlay?.height?:0)
-        grass = grassBitmap
+    }
+
+    override fun resize(w: Int, h: Int, oldw: Int, oldh: Int) {
+        width = overlay.width
+        height = overlay.height
+
+        factorW = width / 4
+        factorH = height / 2
+        bottomSnowman = height - offset
+        topSnowman = height - factorH
+
+        factorHGrass = height / 10
+        heightGrass = height - factorHGrass
+        rectBitmap = Rect(0, topSnowman, width, height)
 
     }
 
     override fun draw(canvas: Canvas?) {
-        Timber.d("draw")
-      //  canvas?.drawBitmap(snowmanBitmap, null, rectSnowman, null)
-        //  canvas?.drawRect( rectSnowman, paint)
-        storyBitmap?.let {
-            canvas?.drawBitmap(it, null, rectGrass, null)
-        }
-
-        //canvas?.drawRect( rectGrass, paint)
+        canvas?.drawBitmap(snowBitmap, null, rectBitmap, null)
 
         for (snowFlake in snowflakes) {
             snowFlake.draw(canvas)
         }
-        //processCanvas.rotate(currentRotation.toFloat())
         overlay.handler.postDelayed(runnable, DELAY.toLong())
     }
+
+    override fun onOrientationChanged(rotation: Int) {
+        if (rotation == 90 || rotation == 270) {
+            rectBitmap = Rect(0, -120, width-width/2, height+120)
+            snowBitmap = snowStoryBitmapLandscape
+        } else {
+            rectBitmap = Rect(0, topSnowman, width, height)
+            snowBitmap = snowStoryBitmapPortrait
+        }
+    }
+
 }

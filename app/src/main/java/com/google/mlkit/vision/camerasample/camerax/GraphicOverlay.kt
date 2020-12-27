@@ -4,9 +4,10 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.TimeFormatException
+import android.view.OrientationEventListener
 import android.view.View
 import androidx.camera.core.CameraSelector
+import com.bumptech.glide.load.ImageHeaderParser
 import timber.log.Timber
 import kotlin.math.ceil
 
@@ -21,29 +22,53 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     var cameraSelector: Int = CameraSelector.LENS_FACING_BACK
     lateinit var processBitmap: Bitmap
     lateinit var processCanvas: Canvas
+    private var currentRotation = 0
 
-    private val DELAY = 5
+    private val orientationEventListener by lazy {
+        object : OrientationEventListener(context) {
+            override fun onOrientationChanged(orientation: Int) {
+                if (orientation == ImageHeaderParser.UNKNOWN_ORIENTATION) {
+                    return
+                }
+                val rotation = when (orientation) {
+                    in 45 until 135 -> 270
+                    in 135 until 225 -> 180
+                    in 225 until 315 -> 90
+                    else -> 0
+                }
+                if (currentRotation != rotation) {
+                    graphics.forEach {
+                        it.onOrientationChanged(rotation)
+                    }
+                    Timber.d("onOrientationChanged=$rotation")
+                    currentRotation = rotation
+                }
+
+            }
+        }
+    }
+
 
     init {
         Timber.d("init")
+        orientationEventListener.enable()
     }
 
-   // private val runnable = Runnable { invalidate() }
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        graphics.forEach {
+            it.resize(w, h, oldw, oldh)
+        }
 
-//    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-//        super.onSizeChanged(w, h, oldw, oldh)
-//        if (w != oldw || h != oldh) {
-//            graphics.forEach{
-//                it.resize(w,h)
-//            }
-//        }
-//
-//    }
+    }
+
     abstract class Graphic(private val overlay: GraphicOverlay) {
 
-      //  abstract fun resize(width: Int, height: Int)
+        abstract fun resize(w: Int, h: Int, oldw: Int, oldh: Int)
 
         abstract fun draw(canvas: Canvas?)
+
+        abstract fun onOrientationChanged(rotation: Int)
 
         fun calculateRect(height: Float, width: Float, boundingBoxT: Rect): RectF {
 
@@ -53,14 +78,14 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
             }
 
             fun whenLandScapeModeWidth(): Float {
-                return when(isLandScapeMode()) {
+                return when (isLandScapeMode()) {
                     true -> width
                     false -> height
                 }
             }
 
             fun whenLandScapeModeHeight(): Float {
-                return when(isLandScapeMode()) {
+                return when (isLandScapeMode()) {
                     true -> height
                     false -> width
                 }
@@ -73,7 +98,8 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
 
             // Calculate offset (we need to center the overlay on the target)
             val offsetX = (overlay.width.toFloat() - ceil(whenLandScapeModeWidth() * scale)) / 2.0f
-            val offsetY = (overlay.height.toFloat() - ceil(whenLandScapeModeHeight() * scale)) / 2.0f
+            val offsetY =
+                (overlay.height.toFloat() - ceil(whenLandScapeModeHeight() * scale)) / 2.0f
 
             overlay.mOffsetX = offsetX
             overlay.mOffsetY = offsetY
@@ -139,7 +165,7 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
         postInvalidate()
     }
 
-    private fun initProcessCanvas () {
+    private fun initProcessCanvas() {
         processBitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)
         processCanvas = Canvas(processBitmap)
     }
@@ -147,13 +173,19 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         synchronized(lock) {
-            Timber.d("onDraw")
             initProcessCanvas()
             graphics.forEach {
                 it.draw(canvas)
                 it.draw(processCanvas)
             }
         }
+    }
+
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        orientationEventListener.disable()
+        Timber.d("ondetach")
     }
 
 }

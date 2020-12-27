@@ -9,11 +9,11 @@
     <dimen name="spacing_medium">8dp</dimen>
     <dimen name="spacing_large">16dp</dimen>
 
-    <dimen name="stroke_small">4dp</dimen>
+    <dimen name="stroke_small">2dp</dimen>
     <dimen name="stroke_medium">8dp</dimen>
     <dimen name="stroke_large">12dp</dimen>
 
-    <dimen name="round_button_small">32dp</dimen>
+    <dimen name="round_button_small">40dp</dimen>
     <dimen name="round_button_medium">64dp</dimen>
     <dimen name="round_button_large">92dp</dimen>
 

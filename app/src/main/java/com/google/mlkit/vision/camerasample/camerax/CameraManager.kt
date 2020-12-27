@@ -3,16 +3,12 @@ package com.google.mlkit.vision.camerasample.camerax
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.ScaleGestureDetector
-import android.widget.ImageButton
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import com.google.mlkit.vision.camerasample.R
-import com.google.mlkit.vision.camerasample.detector.face.FaceContourDetectionProcessor
 import com.google.mlkit.vision.camerasample.snow.SnowDetectorProcessor
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
@@ -64,8 +60,8 @@ class CameraManager(
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
         return when (analyzerVisionType) {
             VisionType.Face ->  SnowDetectorProcessor(graphicOverlay)
-            VisionType.Barcode -> FaceContourDetectionProcessor(graphicOverlay,context)
-            else -> FaceContourDetectionProcessor(graphicOverlay,context)
+            VisionType.Barcode -> SnowDetectorProcessor(graphicOverlay)
+            else -> SnowDetectorProcessor(graphicOverlay)
         }
     }
 
