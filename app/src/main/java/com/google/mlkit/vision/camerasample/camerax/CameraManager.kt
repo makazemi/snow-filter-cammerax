@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.mlkit.vision.camerasample.R
 import com.google.mlkit.vision.camerasample.detector.face.FaceContourDetectionProcessor
+import com.google.mlkit.vision.camerasample.snow.SnowDetectorProcessor
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -35,7 +36,7 @@ class CameraManager(
 
 
     // default barcode scanner
-    private var analyzerVisionType: VisionType = VisionType.NONE
+    private var analyzerVisionType: VisionType = VisionType.Face
 
     lateinit var cameraExecutor: ExecutorService
     lateinit var imageCapture: ImageCapture
@@ -52,6 +53,7 @@ class CameraManager(
     }
 
     init {
+        Timber.d("init")
         createNewExecutor()
     }
 
@@ -61,7 +63,8 @@ class CameraManager(
 
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
         return when (analyzerVisionType) {
-            VisionType.Face ->  FaceContourDetectionProcessor(graphicOverlay,context)
+            VisionType.Face ->  SnowDetectorProcessor(graphicOverlay)
+            VisionType.Barcode -> FaceContourDetectionProcessor(graphicOverlay,context)
             else -> FaceContourDetectionProcessor(graphicOverlay,context)
         }
     }
@@ -134,7 +137,7 @@ class CameraManager(
                 cameraProvider = cameraProviderFuture.get()
                 preview = Preview.Builder()
                    // .setTargetRotation(targetRotation)
-                 //   .setTargetAspectRatio(screenAspectRatio)
+                    .setTargetAspectRatio(screenAspectRatio)
                     .build()
 
                 if(analyzerVisionType!=VisionType.NONE) {
@@ -147,7 +150,6 @@ class CameraManager(
                             it.setAnalyzer(cameraExecutor, selectAnalyzer())
                         }
 
-                    Log.d(TAG,"vision type!=none")
                 }
                 val cameraSelector = CameraSelector.Builder()
                     .requireLensFacing(cameraSelectorOption)

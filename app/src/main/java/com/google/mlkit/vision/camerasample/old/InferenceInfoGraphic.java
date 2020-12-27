@@ -69,8 +69,8 @@ public class InferenceInfoGraphic extends GraphicOverlay.Graphic {
     }
   }
 
-  @Override
-  public void resize(int width, int height) {
-
-  }
+//  @Override
+//  public void resize(int width, int height) {
+//
+//  }
 }

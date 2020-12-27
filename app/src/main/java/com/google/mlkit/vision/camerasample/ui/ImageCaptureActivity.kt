@@ -29,6 +29,10 @@ class ImageCaptureActivity : AppCompatActivity() {
         binding = ActivityImageCaptureBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        binding.root.postDelayed({
+            binding.root.systemUiVisibility = FLAGS_FULLSCREEN
+        }, IMMERSIVE_FLAG_TIMEOUT)
     }
 
 
@@ -36,9 +40,9 @@ class ImageCaptureActivity : AppCompatActivity() {
         super.onResume()
 //         Before setting full screen flags, we must wait a bit to let UI settle; otherwise, we may
 //         be trying to set app to immersive mode before it's ready and the flags do not stick
-        binding.root.postDelayed({
-            binding.root.systemUiVisibility = FLAGS_FULLSCREEN
-        }, IMMERSIVE_FLAG_TIMEOUT)
+//        binding.root.postDelayed({
+//            binding.root.systemUiVisibility = FLAGS_FULLSCREEN
+//        }, IMMERSIVE_FLAG_TIMEOUT)
     }
 
     /** When key down event is triggered, relay it via local broadcast so fragments can handle it */

@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.TimeFormatException
 import android.view.View
 import androidx.camera.core.CameraSelector
+import timber.log.Timber
 import kotlin.math.ceil
 
 open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
@@ -22,6 +24,9 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
 
     private val DELAY = 5
 
+    init {
+        Timber.d("init")
+    }
 
    // private val runnable = Runnable { invalidate() }
 
@@ -36,7 +41,7 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
 //    }
     abstract class Graphic(private val overlay: GraphicOverlay) {
 
-        abstract fun resize(width: Int, height: Int)
+      //  abstract fun resize(width: Int, height: Int)
 
         abstract fun draw(canvas: Canvas?)
 
@@ -142,16 +147,13 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         synchronized(lock) {
+            Timber.d("onDraw")
             initProcessCanvas()
             graphics.forEach {
                 it.draw(canvas)
                 it.draw(processCanvas)
             }
-
-
-          //handler.postDelayed(runnable,DELAY.toLong())
         }
     }
 
-    var overlayHandler=handler
 }

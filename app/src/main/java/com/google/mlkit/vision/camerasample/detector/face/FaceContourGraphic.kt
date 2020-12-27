@@ -34,8 +34,8 @@ class FaceContourGraphic(
     }
 
 
-    override fun resize(width: Int, height: Int) {
-    }
+//    override fun resize(width: Int, height: Int) {
+//    }
 
     private fun Canvas.drawFace(facePosition: Int, @ColorInt selectedColor: Int) {
         val contour = face.getContour(facePosition)

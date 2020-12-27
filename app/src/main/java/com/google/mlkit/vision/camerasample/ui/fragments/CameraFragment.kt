@@ -19,6 +19,7 @@ package com.google.mlkit.vision.camerasample.ui.fragments
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.*
+import android.graphics.drawable.ColorDrawable
 import android.hardware.Camera
 import android.media.Image
 import android.media.MediaScannerConnection
@@ -72,9 +73,9 @@ class CameraFragment : Fragment() {
     private var _binding: FragmentCameraBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var tempBitmap:Bitmap
+    private lateinit var tempBitmap: Bitmap
 
-    private var targetRotation=0
+    private var targetRotation = 0
 
     @Inject
     lateinit var requestManager: RequestManager
@@ -96,11 +97,11 @@ class CameraFragment : Fragment() {
                     in 225 until 315 -> 90
                     else -> 0
                 }
-          //      cameraManager.targetRotation=rotation
-                targetRotation=rotation
+                //      cameraManager.targetRotation=rotation
+                targetRotation = rotation
 
-             //   Timber.d("oritaina on oredinalie=$orientation")
-           //     Timber.d("rotation on oredinalie=$rotation")
+                //   Timber.d("oritaina on oredinalie=$orientation")
+                //     Timber.d("rotation on oredinalie=$rotation")
 
             }
         }
@@ -116,14 +117,19 @@ class CameraFragment : Fragment() {
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Timber.d("onViewCreated")
         init()
     }
+//    override fun onActivityCreated(savedInstanceState: Bundle?) {
+//        super.onActivityCreated(savedInstanceState)
+//
+//        init()
+//    }
 
     @SuppressLint("MissingPermission")
-    private fun init(){
+    private fun init() {
         cameraManager = CameraManager(
             requireContext(),
             binding.viewFinder,
@@ -151,7 +157,7 @@ class CameraFragment : Fragment() {
         cameraManager.setCameraSwitchButtonListener {
             updateCameraSwitchButton(it)
         }
-        tempBitmap=BitmapFactory.decodeResource(resources,R.drawable.img_blog)
+        tempBitmap = BitmapFactory.decodeResource(resources, R.drawable.img_blog)
     }
 
     private fun setGalleryThumbnail(bitmap: Bitmap) {
@@ -200,7 +206,7 @@ class CameraFragment : Fragment() {
         }
 
         // Inflate a new view containing all UI for controlling the camera
-        val controls = View.inflate(requireContext(), R.layout.camera_ui_container,  binding.root)
+        val controls = View.inflate(requireContext(), R.layout.camera_ui_container, binding.root)
 
         // In the background, load latest photo taken (if any) for gallery thumbnail
         lifecycleScope.launch(Dispatchers.IO) {
@@ -232,12 +238,13 @@ class CameraFragment : Fragment() {
         controls.findViewById<ImageButton>(R.id.photo_view_button).setOnClickListener {
             // Only navigate when the gallery has photos
             if (true == outputDirectory.listFiles()?.isNotEmpty()) {
-                findNavController().navigate(CameraFragmentDirections.actionCameraToGallery(outputDirectory.absolutePath))
+                findNavController().navigate(CameraFragmentDirections.actionCameraToGallery(
+                    outputDirectory.absolutePath))
             }
         }
     }
 
-    private fun takePhoto(){
+    private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
         cameraManager.imageCapture.let {
             it.takePicture(
@@ -276,11 +283,9 @@ class CameraFragment : Fragment() {
 
     }
 
-    fun saveImage(bitmap: Bitmap){
 
-    }
 
-    private fun takePhotoFile(){
+    private fun takePhotoFile() {
         // Get a stable reference of the modifiable image capture use case
         cameraManager.imageCapture.let { imageCapture ->
 
@@ -301,7 +306,9 @@ class CameraFragment : Fragment() {
 
             // Setup image capture listener which is triggered after photo has been taken
             imageCapture.takePicture(
-                outputOptions, cameraManager.cameraExecutor, object : ImageCapture.OnImageSavedCallback {
+                outputOptions,
+                cameraManager.cameraExecutor,
+                object : ImageCapture.OnImageSavedCallback {
                     override fun onError(exc: ImageCaptureException) {
                     }
 
@@ -339,69 +346,48 @@ class CameraFragment : Fragment() {
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //
 //                // Display flash animation to indicate that photo was captured
-//                container.postDelayed({
-//                    container.foreground = ColorDrawable(Color.WHITE)
-//                    container.postDelayed(
-//                        { container.foreground = null }, ANIMATION_FAST_MILLIS)
+//                binding.root.postDelayed({
+//                    binding.root.foreground = ColorDrawable(Color.WHITE)
+//                    binding.root.postDelayed(
+//                        {  binding.root.foreground = null }, ANIMATION_FAST_MILLIS)
 //                }, ANIMATION_SLOW_MILLIS)
 //            }
         }
     }
 
     private fun imageToBitmapSaveGallery(image: Image) {
-
-        Timber.d("ishorimode=${cameraManager.isHorizontalMode()}")
-        Timber.d("targetRotation=${targetRotation}")
         image.imageToBitmap()
-        ?.rotateFlipImage(
-       targetRotation.toFloat(),
-        cameraManager.isFrontMode()
-        )
-//            ?.scaleImage(
-//                binding.snowView.processCanvas,
-//                false
-//            )
-        ?.let { bitmap ->
-            val canvas=binding.snowView.processCanvas
-            val realRotation = when (targetRotation.toFloat()) {
-                0f -> 90f
-                90f -> 0f
-                180f -> 270f
-                else -> 180f
+            ?.rotateFlipImage(
+                targetRotation.toFloat(),
+                cameraManager.isFrontMode()
+            )
+            ?.scaleImage(
+                binding.viewFinder,
+                cameraManager.isHorizontalMode()
+            )
+            ?.let { bitmap ->
+                val canvas = binding.graphicOverlay.processCanvas
+                canvas.drawBitmap(
+                    bitmap,
+                    0f,
+                    0f,
+                    Paint().apply {
+                        xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER)
+                    }
+                )
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    saveImage(binding.graphicOverlay.processBitmap, getString(R.string.app_name))
+
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    setGalleryThumbnail(binding.graphicOverlay.processBitmap)
+                }
             }
-
-         //   canvas.rotate(realRotation)
-        //    canvas.scaleImage(binding.viewFinder,cameraManager.isHorizontalMode())
-//            canvas.drawBitmap(
-//                bitmap,
-//                0f,
-//                bitmap.getBaseYByView(
-//                    view = binding.snowView,
-//                    isHorizontalRotation = cameraManager.isHorizontalMode()
-//                ),
-//                Paint().apply {
-//                    xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER)
-//                }
-//            )
-
-            lifecycleScope.launch(Dispatchers.IO){
-                saveImage(bitmap, getString(R.string.app_name))
-
-            }
-            setGalleryThumbnail(bitmap)
-
-            Timber.d("rotated image=$bitmap")
-
-            // We can only change the foreground Drawable using API level 23+ API
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                // Update the gallery thumbnail with latest picture taken
-//                setGalleryThumbnail(binding.snowView.processBitmap)
-//            }
-
-        }
     }
-    private fun updateCameraSwitchButton(isEnable:Boolean) {
-        binding.root.findViewById<ImageButton>(R.id.camera_switch_button).isEnabled=isEnable
+
+    private fun updateCameraSwitchButton(isEnable: Boolean) {
+        binding.root.findViewById<ImageButton>(R.id.camera_switch_button).isEnabled = isEnable
     }
 
     /** Volume down button receiver used to trigger shutter */
@@ -414,6 +400,7 @@ class CameraFragment : Fragment() {
             }
         }
     }
+
     override fun onStart() {
         super.onStart()
         orientationEventListener.enable()
@@ -437,14 +424,12 @@ class CameraFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
-     //   cameraManager.cameraExecutor.shutdown()
-
+       _binding = null
     }
 
     companion object {
-         const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
-         const val PHOTO_EXTENSION = ".jpg"
+        const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
+        const val PHOTO_EXTENSION = ".jpg"
 
         /** Helper function used to create a timestamped file */
         private fun createFile(baseFolder: File, format: String, extension: String) =

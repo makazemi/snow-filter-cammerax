@@ -22,9 +22,9 @@ fun Bitmap.rotateFlipImage(degree: Float, isFrontMode: Boolean): Bitmap? {
         else ->degree
     }
     val matrix = Matrix().apply {
-//        if (isFrontMode) {
-//            preScale(1.0f, -1.0f)
-//        }
+        if (isFrontMode) {
+            preScale(-1.0f, 1.0f)
+        }
         postRotate(realRotation)
     }
     return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
