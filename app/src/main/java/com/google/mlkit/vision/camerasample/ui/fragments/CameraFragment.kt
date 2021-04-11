@@ -376,10 +376,13 @@ class CameraFragment : Fragment() {
                     }
                 )
 
-                lifecycleScope.launch(Dispatchers.IO) {
-                    saveImage(binding.graphicOverlay.processBitmap, getString(R.string.app_name))
+                viewModel.setResultBitmap(binding.graphicOverlay.processBitmap)
+                goToResultPhoto()
 
-                }
+//                lifecycleScope.launch(Dispatchers.IO) {
+//                    saveImage(binding.graphicOverlay.processBitmap, getString(R.string.app_name))
+//
+//                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     setGalleryThumbnail(binding.graphicOverlay.processBitmap)
                 }
@@ -435,5 +438,9 @@ class CameraFragment : Fragment() {
         private fun createFile(baseFolder: File, format: String, extension: String) =
             File(baseFolder, SimpleDateFormat(format, Locale.US)
                 .format(System.currentTimeMillis()) + extension)
+    }
+
+    private fun goToResultPhoto(){
+        this.findNavController().navigate(R.id.action_camera_fragment_to_resultPhotoFragment)
     }
 }

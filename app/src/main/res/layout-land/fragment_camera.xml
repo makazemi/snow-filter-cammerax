@@ -48,7 +48,7 @@
         app:layout_constraintTop_toTopOf="@id/view_finder"
         app:layout_constraintBottom_toBottomOf="@id/view_finder"/>
 
-    <com.google.mlkit.vision.camerasample.snow.SnowGraphicOverlay
+    <com.google.mlkit.vision.camerasample.detector.snow.SnowGraphicOverlay
         android:id="@+id/snowView"
         android:layout_width="match_parent"
         android:layout_height="0dp"

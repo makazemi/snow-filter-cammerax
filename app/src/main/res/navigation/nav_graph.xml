@@ -47,6 +47,9 @@
             app:destination="@id/permissions_fragment"
             app:popUpTo="@id/camera_fragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_camera_fragment_to_resultPhotoFragment"
+            app:destination="@id/resultPhotoFragment" />
 
     </fragment>
 
@@ -57,6 +60,16 @@
         <argument
             android:name="root_directory"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/resultPhotoFragment"
+        android:name="com.google.mlkit.vision.camerasample.ui.fragments.ResultPhotoFragment"
+        android:label="ResultPhotoFragment" >
+        <action
+            android:id="@+id/action_resultPhotoFragment_to_camera_fragment"
+            app:destination="@id/camera_fragment"
+            app:popUpTo="@id/camera_fragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
 </navigation>

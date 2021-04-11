@@ -9,7 +9,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import com.google.mlkit.vision.camerasample.snow.SnowDetectorProcessor
+import com.google.mlkit.vision.camerasample.detector.face.FaceDetectorProcessor
+import com.google.mlkit.vision.camerasample.detector.snow.SnowDetectorProcessor
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -32,7 +33,7 @@ class CameraManager(
 
 
     // default barcode scanner
-    private var analyzerVisionType: VisionType = VisionType.Face
+    private var analyzerVisionType: VisionType = VisionType.Snow
 
     lateinit var cameraExecutor: ExecutorService
     lateinit var imageCapture: ImageCapture
@@ -59,8 +60,8 @@ class CameraManager(
 
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
         return when (analyzerVisionType) {
-            VisionType.Face ->  SnowDetectorProcessor(graphicOverlay)
-            VisionType.Barcode -> SnowDetectorProcessor(graphicOverlay)
+            VisionType.Face ->  FaceDetectorProcessor(graphicOverlay)
+            VisionType.Snow -> SnowDetectorProcessor(graphicOverlay)
             else -> SnowDetectorProcessor(graphicOverlay)
         }
     }

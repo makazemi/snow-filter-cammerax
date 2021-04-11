@@ -16,13 +16,17 @@
 
 package com.google.mlkit.vision.camerasample.extension
 
+import android.app.Dialog
 import android.os.Build
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import timber.log.Timber
 
 /** Combination of all flags required to put activity into immersive mode */
 const val FLAGS_FULLSCREEN =
@@ -87,4 +91,16 @@ fun AlertDialog.showImmersive() {
 
     // Set the dialog to focusable again
     window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+}
+fun displayLoadingDialog(inProgress: Boolean, dialog: Dialog?) {
+    dialog?.let {
+        if (inProgress)
+            dialog.show()
+        else
+            dialog.dismiss()
+    }
+    Timber.d("displayLoadingDialog inprogress=$inProgress dialog=$dialog")
+}
+fun Fragment.displayToast(message: String) {
+    Toast.makeText(this.context, message, Toast.LENGTH_SHORT).show()
 }

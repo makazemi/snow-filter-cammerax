@@ -111,7 +111,6 @@
     <string name="pref_key_still_image_pose_detector_show_in_frame_likelihood" translatable="false">sipdsifl</string>
 
 
-
     <string name="capture_button_alt">Capture</string>
     <string name="switch_camera_button_alt">Switch camera</string>
     <string name="gallery_button_alt">Gallery</string>
@@ -121,7 +120,11 @@
     <string name="capture_mode_camera">Camera</string>
     <string name="capture_mode_hdr">HDR</string>
     <string name="capture_mode_night">Night</string>
-    <string name="delete_button_alt">Delete</string>
-    <string name="delete_dialog">Delete current photo?</string>
+    <string name="delete_button_alt">حذف</string>
+    <string name="delete_dialog">حذف این عکس؟</string>
     <string name="delete_title">Confirm</string>
+    <string name="wait">لطفا صبر کنید</string>
+    <string name="your_image_saved_successfully">عکس شما با موفقیت در گالری ذخیره شد</string>
+
+
 </resources>

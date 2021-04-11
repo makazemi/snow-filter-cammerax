@@ -1,6 +1,5 @@
-package com.google.mlkit.vision.camerasample.snow
+package com.google.mlkit.vision.camerasample.detector.snow
 
-import android.content.Context
 import android.graphics.Rect
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay
@@ -26,7 +25,7 @@ class SnowDetectorProcessor (private val view: GraphicOverlay
     init {
         Timber.d("init")
         graphicOverlay.clear()
-        graphicOverlay.add(SnowGraphic(graphicOverlay,view.resources))
+        graphicOverlay.add(SnowGraphic(graphicOverlay))
         graphicOverlay.postInvalidate()
     }
     override fun detectInImage(image: InputImage): Task<List<Face>> {

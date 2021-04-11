@@ -1,5 +1,5 @@
 package com.google.mlkit.vision.camerasample.camerax
 
 enum class VisionType {
-    Barcode, Face, Object, OCR,NONE
+    Snow, Face, Object, OCR,NONE
 }

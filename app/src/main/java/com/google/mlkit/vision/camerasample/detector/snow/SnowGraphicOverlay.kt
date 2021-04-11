@@ -1,4 +1,4 @@
-package com.google.mlkit.vision.camerasample.snow
+package com.google.mlkit.vision.camerasample.detector.snow
 
 import android.content.Context
 import android.graphics.*

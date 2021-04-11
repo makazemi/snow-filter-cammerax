@@ -1,6 +1,5 @@
-package com.google.mlkit.vision.camerasample.snow
+package com.google.mlkit.vision.camerasample.detector.snow
 
-import android.content.res.Resources
 import android.graphics.*
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
@@ -9,7 +8,7 @@ import com.google.mlkit.vision.camerasample.camerax.GraphicOverlay
 import timber.log.Timber
 
 
-class SnowGraphic(private val overlay: GraphicOverlay, resources: Resources) :
+class SnowGraphic(private val overlay: GraphicOverlay) :
     GraphicOverlay.Graphic(overlay) {
 
 
@@ -25,9 +24,9 @@ class SnowGraphic(private val overlay: GraphicOverlay, resources: Resources) :
 
 
     private val snowStoryBitmapPortrait =
-        BitmapFactory.decodeResource(resources, R.drawable.snow_story)
+        BitmapFactory.decodeResource(overlay.resources, R.drawable.snow_story)
     private val snowStoryBitmapLandscape =
-        BitmapFactory.decodeResource(resources, R.drawable.snow_story_land)
+        BitmapFactory.decodeResource(overlay.resources, R.drawable.snow_story_land)
     private var snowBitmap = snowStoryBitmapPortrait
 
     private val snowFlakeBitmap =

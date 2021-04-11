@@ -10,6 +10,10 @@ import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import com.google.mlkit.vision.camerasample.R
 import com.google.mlkit.vision.camerasample.ui.fragments.CameraFragment
+import com.google.mlkit.vision.camerasample.util.DataState
+import com.google.mlkit.vision.camerasample.util.ErrorBody
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -48,7 +52,7 @@ fun Activity.saveImage(bitmap: Bitmap, folderName: String) {
     }
 }
 
-fun Fragment.saveImage(bitmap: Bitmap, folderName: String) {
+fun Fragment.saveImage(bitmap: Bitmap, folderName: String=getString(R.string.app_name)) {
     if (android.os.Build.VERSION.SDK_INT >= 29) {
         val values = contentValues()
         values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/$folderName")
@@ -62,18 +66,45 @@ fun Fragment.saveImage(bitmap: Bitmap, folderName: String) {
             requireActivity().contentResolver.update(uri, values, null, null)
         }
     } else {
-      //  val directory = File(Environment.getExternalStorageDirectory().toString() + File.separator + folderName)
-        // getExternalStorageDirectory is deprecated in API 29
-
-//        if (!directory.exists()) {
-//            directory.mkdirs()
-//        }
-        val fileName = System.currentTimeMillis().toString() + ".png"
-        //val file = File(directory, fileName)
         val file=getOutputDirectory().createFile(
             CameraFragment.FILENAME,
             CameraFragment.PHOTO_EXTENSION)
         saveImageToStream(bitmap, FileOutputStream(file))
+        if (file.absolutePath != null) {
+            val values = contentValues()
+            values.put(MediaStore.Images.Media.DATA, file.absolutePath)
+            // .DATA is deprecated in API 29
+            requireActivity().contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        }
+    }
+}
+
+suspend fun Fragment.saveImage(bitmap: Bitmap):Flow<DataState<String>> =flow{
+    emit(
+        DataState.loading(isLoading = true)
+    )
+    if (android.os.Build.VERSION.SDK_INT >= 29) {
+        val values = contentValues()
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${getString(R.string.app_name)}")
+        values.put(MediaStore.Images.Media.IS_PENDING, true)
+        // RELATIVE_PATH and IS_PENDING are introduced in API 29.
+
+        val uri: Uri? = requireActivity().contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        if (uri != null) {
+            emit(
+                saveImageToStreamWithFlow(bitmap,requireActivity().contentResolver.openOutputStream(uri))
+            )
+
+            values.put(MediaStore.Images.Media.IS_PENDING, false)
+            requireActivity().contentResolver.update(uri, values, null, null)
+        }
+    } else {
+        val file=getOutputDirectory().createFile(
+            CameraFragment.FILENAME,
+            CameraFragment.PHOTO_EXTENSION)
+        emit(
+            saveImageToStreamWithFlow(bitmap, FileOutputStream(file))
+        )
         if (file.absolutePath != null) {
             val values = contentValues()
             values.put(MediaStore.Images.Media.DATA, file.absolutePath)
@@ -102,6 +133,26 @@ private fun saveImageToStream(bitmap: Bitmap, outputStream: OutputStream?) {
     }
 }
 
+private suspend fun saveImageToStreamWithFlow(bitmap: Bitmap, outputStream: OutputStream?): DataState<String>{
+    if (outputStream != null) {
+        return try {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.close()
+
+            DataState.data("success")
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            DataState.error<String>(message = ErrorBody(message = "fail"))
+
+        }
+    }else{
+
+        return  DataState.error<String>(message = ErrorBody(message = "fail"))
+
+    }
+}
 fun Fragment.getOutputDirectory(): File {
     val appContext = requireContext().applicationContext
     val mediaDir = requireContext().externalMediaDirs.firstOrNull()?.let {

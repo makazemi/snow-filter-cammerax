@@ -1,16 +1,11 @@
 package com.google.mlkit.vision.camerasample.ui
 
-import androidx.hilt.Assisted
+import android.graphics.Bitmap
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.google.mlkit.vision.camerasample.util.Event
 
-class CameraViewModel @ViewModelInject constructor(
-    @Assisted private val savedStateHandle: SavedStateHandle
-) : ViewModel(){
+class CameraViewModel @ViewModelInject constructor() : ViewModel(){
 
     private val _keyDownVolumeEvent=MutableLiveData<Event<Boolean>>()
 
@@ -19,4 +14,13 @@ class CameraViewModel @ViewModelInject constructor(
     fun setKeyDownVolumeEvent(){
         _keyDownVolumeEvent.value=Event.dataEvent(true)
     }
+
+    private val _resultBitmap=MutableLiveData<Event<Bitmap>>()
+
+    val resultBitmap:LiveData<Event<Bitmap>> get() = _resultBitmap
+
+    fun setResultBitmap(value:Bitmap){
+        _resultBitmap.value=Event.dataEvent(value)
+    }
+
 }
