@@ -16,6 +16,10 @@
 
 package com.google.mlkit.vision.camerasample.extension
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.Dialog
 import android.os.Build
 import android.view.DisplayCutout
@@ -103,4 +107,31 @@ fun displayLoadingDialog(inProgress: Boolean, dialog: Dialog?) {
 }
 fun Fragment.displayToast(message: String) {
     Toast.makeText(this.context, message, Toast.LENGTH_SHORT).show()
+}
+
+fun View.scaleUpAnim(){
+    val animationSetScaleUp = AnimatorSet()
+    val animationSetScaleDown = AnimatorSet()
+
+    val scaleUpY = ObjectAnimator.ofFloat(this, "scaleY", 1f, 1.5f)
+    val scaleUpX = ObjectAnimator.ofFloat(this, "scaleX", 1f, 1.5f)
+
+    animationSetScaleUp.playTogether(scaleUpY, scaleUpX)
+
+    val scaleDownY = ObjectAnimator.ofFloat(this, "scaleY", 1.5f, 1f)
+    val scaleDownX = ObjectAnimator.ofFloat(this, "scaleX", 1.5f, 1f)
+
+
+    animationSetScaleUp.playTogether(scaleUpY, scaleUpX)
+
+    animationSetScaleDown.playTogether(scaleDownX,scaleDownY)
+
+    animationSetScaleUp.apply {
+        addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                animationSetScaleDown.start()
+            }
+        })
+    }
+    animationSetScaleUp.start()
 }

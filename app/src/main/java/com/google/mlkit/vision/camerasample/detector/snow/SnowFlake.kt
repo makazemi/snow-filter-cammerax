@@ -1,9 +1,10 @@
 package com.google.mlkit.vision.camerasample.detector.snow
 
 import android.graphics.*
+import kotlin.math.cos
+import kotlin.math.sin
 
 class SnowFlake internal constructor(
-    private val random: Random,
     private val position: Point,
     private var angle: Float,
     private val increment: Float,
@@ -18,7 +19,7 @@ class SnowFlake internal constructor(
                 + OFFSET, position.y + OFFSET
     )
 
-    private val probabilityBitmap = random.getRandom(25)
+    private val probabilityBitmap = Random.getRandom(25)
 
 
 
@@ -28,9 +29,9 @@ class SnowFlake internal constructor(
     }
 
     private fun move(width: Int, height: Int) {
-        val x = position.x + increment * Math.cos(angle.toDouble())
-        val y = position.y + increment * Math.sin(angle.toDouble())
-        angle += random.getRandom(-ANGLE_SEED, ANGLE_SEED) / ANGLE_DIVISOR
+        val x = position.x + increment * cos(angle.toDouble())
+        val y = position.y + increment * sin(angle.toDouble())
+        angle += Random.getRandom(-ANGLE_SEED, ANGLE_SEED) / ANGLE_DIVISOR
         position[x.toInt()] = y.toInt()
         if (!isInside(width, height)) {
             reset(width)
@@ -44,9 +45,9 @@ class SnowFlake internal constructor(
     }
 
     private fun reset(width: Int) {
-        position.x = random.getRandom(width)
+        position.x = Random.getRandom(width)
         position.y = (-flakeSize - 1).toInt()
-        angle = random.getRandom(ANGLE_SEED) / ANGLE_SEED * ANGE_RANGE + HALF_PI - HALF_ANGLE_RANGE
+        angle = Random.getRandom(ANGLE_SEED) / ANGLE_SEED * ANGE_RANGE + HALF_PI - HALF_ANGLE_RANGE
         rectBitmap.left = position.x
         rectBitmap.top = position.y
         rectBitmap.right = position.x + OFFSET
@@ -81,15 +82,14 @@ class SnowFlake internal constructor(
         private const val FLAKE_SIZE_LOWER = 2f
         private const val FLAKE_SIZE_UPPER = 6f
         fun create(width: Int, height: Int, bitmap: Bitmap?): SnowFlake {
-            val random = Random()
-            val x = random.getRandom(width)
-            val y = random.getRandom(height)
+            val x = Random.getRandom(width)
+            val y = Random.getRandom(height)
             val position = Point(x, y)
             val angle =
-                random.getRandom(ANGLE_SEED) / ANGLE_SEED * ANGE_RANGE + HALF_PI - HALF_ANGLE_RANGE
-            val increment = random.getRandom(INCREMENT_LOWER, INCREMENT_UPPER)
-            val flakeSize = random.getRandom(FLAKE_SIZE_LOWER, FLAKE_SIZE_UPPER)
-            return SnowFlake(random, position, angle, increment, flakeSize, bitmap)
+                Random.getRandom(ANGLE_SEED) / ANGLE_SEED * ANGE_RANGE + HALF_PI - HALF_ANGLE_RANGE
+            val increment = Random.getRandom(INCREMENT_LOWER, INCREMENT_UPPER)
+            val flakeSize = Random.getRandom(FLAKE_SIZE_LOWER, FLAKE_SIZE_UPPER)
+            return SnowFlake(position, angle, increment, flakeSize, bitmap)
         }
     }
 }

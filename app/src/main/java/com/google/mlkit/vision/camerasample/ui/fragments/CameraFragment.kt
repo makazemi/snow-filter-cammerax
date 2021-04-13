@@ -17,24 +17,19 @@
 package com.google.mlkit.vision.camerasample.ui.fragments
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.*
-import android.graphics.drawable.ColorDrawable
-import android.hardware.Camera
 import android.media.Image
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.webkit.MimeTypeMap
 import android.widget.ImageButton
+import androidx.annotation.RequiresApi
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -55,7 +50,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
@@ -73,7 +67,6 @@ class CameraFragment : Fragment() {
     private var _binding: FragmentCameraBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var tempBitmap: Bitmap
 
     private var targetRotation = 0
 
@@ -97,11 +90,7 @@ class CameraFragment : Fragment() {
                     in 225 until 315 -> 90
                     else -> 0
                 }
-                //      cameraManager.targetRotation=rotation
                 targetRotation = rotation
-
-                //   Timber.d("oritaina on oredinalie=$orientation")
-                //     Timber.d("rotation on oredinalie=$rotation")
 
             }
         }
@@ -119,15 +108,10 @@ class CameraFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Timber.d("onViewCreated")
         init()
     }
-//    override fun onActivityCreated(savedInstanceState: Bundle?) {
-//        super.onActivityCreated(savedInstanceState)
-//
-//        init()
-//    }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("MissingPermission")
     private fun init() {
         cameraManager = CameraManager(
@@ -140,15 +124,13 @@ class CameraFragment : Fragment() {
 
         // Wait for the views to be properly laid out
         binding.viewFinder.post {
-
-
             // Build UI controls
             updateCameraUi()
 
             // Set up the camera and its use cases
             cameraManager.startCamera()
         }
-        binding.root.findViewById<ImageButton>(R.id.back_button).setOnClickListener {
+        binding.backButton.setOnClickListener {
             requireActivity().finish()
         }
 
@@ -157,20 +139,16 @@ class CameraFragment : Fragment() {
         cameraManager.setCameraSwitchButtonListener {
             updateCameraSwitchButton(it)
         }
-        tempBitmap = BitmapFactory.decodeResource(resources, R.drawable.img_blog)
+
     }
 
     private fun setGalleryThumbnail(bitmap: Bitmap) {
-        // Reference of the view that holds the gallery thumbnail
         val thumbnail = binding.root.findViewById<ImageButton>(R.id.photo_view_button)
 
         // Run the operations in the view's thread
         thumbnail.post {
-
             // Remove thumbnail padding
             thumbnail.setPadding(resources.getDimension(R.dimen.stroke_small).toInt())
-
-            // Load thumbnail into circular button using Glide
             requestManager
                 .load(bitmap)
                 .apply(RequestOptions.circleCropTransform())
@@ -179,16 +157,11 @@ class CameraFragment : Fragment() {
     }
 
     private fun setGalleryThumbnail(uri: Uri) {
-        // Reference of the view that holds the gallery thumbnail
         val thumbnail = binding.root.findViewById<ImageButton>(R.id.photo_view_button)
-
         // Run the operations in the view's thread
         thumbnail.post {
-
             // Remove thumbnail padding
             thumbnail.setPadding(resources.getDimension(R.dimen.stroke_small).toInt())
-
-            // Load thumbnail into circular button using Glide
             Glide.with(thumbnail)
                 .load(uri)
                 .apply(RequestOptions.circleCropTransform())
@@ -212,7 +185,7 @@ class CameraFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             outputDirectory.listFiles { file ->
                 EXTENSION_WHITELIST.contains(file.extension.toUpperCase(Locale.ROOT))
-            }?.max()?.let {
+            }?.maxOrNull()?.let {
                 setGalleryThumbnail(Uri.fromFile(it))
             }
         }
@@ -245,19 +218,16 @@ class CameraFragment : Fragment() {
     }
 
     private fun takePhoto() {
-        // Get a stable reference of the modifiable image capture use case
         cameraManager.imageCapture.let {
             it.takePicture(
                 ContextCompat.getMainExecutor(requireContext()),
                 object : ImageCapture.OnImageCapturedCallback() {
+
                     @SuppressLint("UnsafeExperimentalUsageError", "RestrictedApi")
                     override fun onCaptureSuccess(image: ImageProxy) {
                         super.onCaptureSuccess(image)
-                        Timber.d("onCaptureSuccess image=$it")
                         image.image?.let {
                             imageToBitmapSaveGallery(it)
-                            Timber.d("onCaptureSuccess image.image=$it")
-
                         }
                     }
 
@@ -266,95 +236,12 @@ class CameraFragment : Fragment() {
                         Timber.d("onError=$exception")
                     }
                 })
-
-
-            // We can only change the foreground Drawable using API level 23+ API
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//
-//                // Display flash animation to indicate that photo was captured
-//                binding.root.postDelayed({
-//                    binding.root.foreground = ColorDrawable(Color.WHITE)
-//                    binding.root.postDelayed(
-//                        {  binding.root.foreground = null }, ANIMATION_FAST_MILLIS)
-//                }, ANIMATION_SLOW_MILLIS)
-//            }
         }
 
 
     }
 
-
-
-    private fun takePhotoFile() {
-        // Get a stable reference of the modifiable image capture use case
-        cameraManager.imageCapture.let { imageCapture ->
-
-            // Create output file to hold the image
-            val photoFile = createFile(outputDirectory, FILENAME, PHOTO_EXTENSION)
-
-            // Setup image capture metadata
-            val metadata = ImageCapture.Metadata().apply {
-
-                // Mirror image when using the front camera
-                isReversedHorizontal = cameraManager.isFrontMode()
-            }
-
-            // Create output options object which contains file + metadata
-            val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile)
-                .setMetadata(metadata)
-                .build()
-
-            // Setup image capture listener which is triggered after photo has been taken
-            imageCapture.takePicture(
-                outputOptions,
-                cameraManager.cameraExecutor,
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(exc: ImageCaptureException) {
-                    }
-
-                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                        val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                        // We can only change the foreground Drawable using API level 23+ API
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            // Update the gallery thumbnail with latest picture taken
-                            setGalleryThumbnail(savedUri)
-                        }
-
-                        // Implicit broadcasts will be ignored for devices running API level >= 24
-                        // so if you only target API level 24+ you can remove this statement
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                            requireActivity().sendBroadcast(
-                                Intent(Camera.ACTION_NEW_PICTURE, savedUri)
-                            )
-                        }
-
-                        // If the folder selected is an external media directory, this is
-                        // unnecessary but otherwise other apps will not be able to access our
-                        // images unless we scan them using [MediaScannerConnection]
-                        val mimeType = MimeTypeMap.getSingleton()
-                            .getMimeTypeFromExtension(savedUri.toFile().extension)
-                        MediaScannerConnection.scanFile(
-                            context,
-                            arrayOf(savedUri.toFile().absolutePath),
-                            arrayOf(mimeType)
-                        ) { _, uri ->
-                        }
-                    }
-                })
-
-            // We can only change the foreground Drawable using API level 23+ API
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//
-//                // Display flash animation to indicate that photo was captured
-//                binding.root.postDelayed({
-//                    binding.root.foreground = ColorDrawable(Color.WHITE)
-//                    binding.root.postDelayed(
-//                        {  binding.root.foreground = null }, ANIMATION_FAST_MILLIS)
-//                }, ANIMATION_SLOW_MILLIS)
-//            }
-        }
-    }
-
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun imageToBitmapSaveGallery(image: Image) {
         image.imageToBitmap()
             ?.rotateFlipImage(
@@ -379,10 +266,6 @@ class CameraFragment : Fragment() {
                 viewModel.setResultBitmap(binding.graphicOverlay.processBitmap)
                 goToResultPhoto()
 
-//                lifecycleScope.launch(Dispatchers.IO) {
-//                    saveImage(binding.graphicOverlay.processBitmap, getString(R.string.app_name))
-//
-//                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     setGalleryThumbnail(binding.graphicOverlay.processBitmap)
                 }
@@ -416,8 +299,6 @@ class CameraFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Make sure that all permissions are still present, since the
-        // user could have removed them while the app was in paused state.
         if (!PermissionsFragment.hasPermissions(requireContext())) {
             Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
                 CameraFragmentDirections.actionCameraToPermissions()
@@ -427,17 +308,7 @@ class CameraFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-       _binding = null
-    }
-
-    companion object {
-        const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
-        const val PHOTO_EXTENSION = ".jpg"
-
-        /** Helper function used to create a timestamped file */
-        private fun createFile(baseFolder: File, format: String, extension: String) =
-            File(baseFolder, SimpleDateFormat(format, Locale.US)
-                .format(System.currentTimeMillis()) + extension)
+        _binding = null
     }
 
     private fun goToResultPhoto(){

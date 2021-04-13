@@ -1,11 +1,12 @@
 package com.google.mlkit.vision.camerasample.ui.fragments
 
 
-import android.graphics.drawable.AnimationDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -14,7 +15,9 @@ import com.google.mlkit.vision.camerasample.R
 import com.google.mlkit.vision.camerasample.base.BaseFragment
 import com.google.mlkit.vision.camerasample.databinding.FragmentResultPhotoBinding
 import com.google.mlkit.vision.camerasample.extension.displayToast
+import com.google.mlkit.vision.camerasample.extension.scaleUpAnim
 import com.google.mlkit.vision.camerasample.ui.CameraViewModel
+import com.google.mlkit.vision.camerasample.util.Loading
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,6 +46,7 @@ class ResultPhotoFragment : BaseFragment() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         init()
@@ -51,8 +55,11 @@ class ResultPhotoFragment : BaseFragment() {
     override fun displayProgressBar(inProgress: Boolean) {
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun init() {
 
-    private fun init(){
+
+
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -61,47 +68,18 @@ class ResultPhotoFragment : BaseFragment() {
 
         subscribeObserverResultSave()
 
-        var animSave: AnimationDrawable
-        binding.btnSave.apply {
-            setBackgroundResource(R.drawable.to_save_done_anim)
-            animSave = background as AnimationDrawable
-            setOnClickListener {
-                animSave.start()
-                saveImageBitmap()
-            }
+        binding.btnSave.setOnClickListener {
+            it.scaleUpAnim()
+            saveImageBitmap()
         }
 
-//        val scaleUp = ObjectAnimator.ofPropertyValuesHolder(binding.btnSave,
-//            PropertyValuesHolder.ofFloat("scaleX", 1f),
-//            PropertyValuesHolder.ofFloat("scaleY", 1f))
-//        scaleUp.duration = 1000
-//        scaleUp.repeatMode=ValueAnimator.RESTART
-//        scaleUp.start()
-//        val animatorSet1 = AnimatorSet()
-//        val animatorSet2 = AnimatorSet()
-//        val scaleXUp=ObjectAnimator.ofFloat(binding.btnSave, "scaleX", 50f).apply {
-//            duration = 1000
-//        }
-//        val scaleYUp=ObjectAnimator.ofFloat(binding.btnSave, "scaleY", 50f).apply {
-//            duration = 1000
-//        }
-//        val scaleXDown=ObjectAnimator.ofFloat(binding.btnSave, "scaleX", 20f).apply {
-//            duration = 1000
-//        }
-//        val scaleYDown=ObjectAnimator.ofFloat(binding.btnSave, "scaleY", 20f).apply {
-//            duration = 1000
-//        }
-//
-//        animatorSet1.play(scaleXUp).with(scaleYUp)
-//        animatorSet1.startDelay=1000
-//
-//        animatorSet2.play(scaleXDown).with(scaleYDown).after(animatorSet1)
-//        animatorSet1.start()
-//        animatorSet2.start()
+
+
     }
 
-    private fun subscribeObserverBitmap(){
-        cameraViewModel.resultBitmap.observe(viewLifecycleOwner){
+
+    private fun subscribeObserverBitmap() {
+        cameraViewModel.resultBitmap.observe(viewLifecycleOwner) {
             it?.getContentIfNotHandled()?.let {
                 requestManager.load(it)
                     .into(binding.img)
@@ -109,20 +87,36 @@ class ResultPhotoFragment : BaseFragment() {
         }
     }
 
-    private fun saveImageBitmap(){
+    private fun saveImageBitmap() {
         cameraViewModel.resultBitmap.value?.peekContent()?.let { bitmap ->
             viewModel.setResultBitmap(bitmap)
+            Timber.d("resultBitmap")
         }
 
     }
 
-    private fun subscribeObserverResultSave(){
-        viewModel.saveImageResult.observe(viewLifecycleOwner){
+
+    private fun subscribeObserverResultSave() {
+        viewModel.saveImageResult.observe(viewLifecycleOwner) {
             it?.data?.getContentIfNotHandled()?.let {
                 Timber.d("save image=$it")
                 displayToast(getString(R.string.your_image_saved_successfully))
+                binding.btnSave.setImageResource(R.drawable.ic_save_done)
             }
-            onDataStateChange(it.loading, it.error, isDialog = true)
+            onDataStateChange(it.loading, it.error, isDialog = false, isShowProgress = false)
+            showLoadingSaveImage(it.loading)
+        }
+    }
+
+    private fun showLoadingSaveImage(loading: Loading) {
+        if (loading.isLoading) {
+            binding.animSaveImage.visibility = View.VISIBLE
+            binding.animSaveImage.playAnimation()
+            binding.btnSave.visibility = View.INVISIBLE
+        } else {
+            binding.animSaveImage.visibility = View.GONE
+            binding.animSaveImage.pauseAnimation()
+            binding.btnSave.visibility = View.VISIBLE
         }
     }
 

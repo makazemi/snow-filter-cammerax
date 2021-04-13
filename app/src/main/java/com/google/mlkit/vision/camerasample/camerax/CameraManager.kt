@@ -9,7 +9,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import com.google.mlkit.vision.camerasample.detector.face.FaceDetectorProcessor
 import com.google.mlkit.vision.camerasample.detector.snow.SnowDetectorProcessor
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
@@ -39,13 +38,13 @@ class CameraManager(
     lateinit var imageCapture: ImageCapture
 
 
-   // var rotation: Float = 0F
-     var targetRotation=0
+    // var rotation: Float = 0F
+    var targetRotation=0
     var cameraSelectorOption = CameraSelector.LENS_FACING_BACK
 
-    private lateinit var cameraSwitchButtonListener: (isEnable:Boolean) -> Unit
+    private lateinit var cameraSwitchButtonListener: (isEnable: Boolean) -> Unit
 
-    fun setCameraSwitchButtonListener(callback: (isEnable:Boolean) -> Unit) {
+    fun setCameraSwitchButtonListener(callback: (isEnable: Boolean) -> Unit) {
         this.cameraSwitchButtonListener = callback
     }
 
@@ -60,7 +59,7 @@ class CameraManager(
 
     private fun selectAnalyzer(): ImageAnalysis.Analyzer {
         return when (analyzerVisionType) {
-            VisionType.Face ->  FaceDetectorProcessor(graphicOverlay)
+            VisionType.Face -> SnowDetectorProcessor(graphicOverlay)
             VisionType.Snow -> SnowDetectorProcessor(graphicOverlay)
             else -> SnowDetectorProcessor(graphicOverlay)
         }
@@ -72,7 +71,7 @@ class CameraManager(
     ) {
         try {
             cameraProvider?.unbindAll()
-            if(analyzerVisionType==VisionType.NONE) {
+            if(analyzerVisionType== VisionType.NONE) {
                 cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
@@ -93,7 +92,7 @@ class CameraManager(
                 finderView.surfaceProvider
             )
         } catch (e: Exception) {
-            Timber.d( "Use case binding failed=$e")
+            Timber.d("Use case binding failed=$e")
         }
     }
 
@@ -133,14 +132,14 @@ class CameraManager(
 
                 cameraProvider = cameraProviderFuture.get()
                 preview = Preview.Builder()
-                   // .setTargetRotation(targetRotation)
+                    // .setTargetRotation(targetRotation)
                     .setTargetAspectRatio(screenAspectRatio)
                     .build()
 
-                if(analyzerVisionType!=VisionType.NONE) {
+                if (analyzerVisionType != VisionType.NONE) {
                     imageAnalyzer = ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                      //  .setTargetRotation(targetRotation)
+                        //  .setTargetRotation(targetRotation)
                         .setTargetAspectRatio(screenAspectRatio)
                         .build()
                         .also {
@@ -156,7 +155,7 @@ class CameraManager(
                 imageCapture =
                     ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                       // .setTargetRotation(targetRotation)
+                        // .setTargetRotation(targetRotation)
                         .setTargetAspectRatio(screenAspectRatio)
                         .build()
 
@@ -175,7 +174,7 @@ class CameraManager(
         cameraSelectorOption =
             if (cameraSelectorOption == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT
             else CameraSelector.LENS_FACING_BACK
-       graphicOverlay.toggleSelector()
+        graphicOverlay.toggleSelector()
         startCamera()
     }
 
@@ -195,9 +194,6 @@ class CameraManager(
         return cameraSelectorOption == CameraSelector.LENS_FACING_FRONT
     }
 
-//    fun setTargetRotation(rotation:Int){
-//        targetRotation=rotation
-//    }
 
     /** Enabled or disabled a button to switch cameras depending on the available cameras */
     private fun updateCameraSwitchButton():Boolean{
@@ -222,7 +218,6 @@ class CameraManager(
     companion object {
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
-        private const val TAG = "CameraXBasic"
     }
 
 }

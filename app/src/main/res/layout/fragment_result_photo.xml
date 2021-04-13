@@ -12,6 +12,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/lay_bottom"
+        android:scaleType="centerCrop"
         />
 
     <ImageButton
@@ -28,7 +29,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_close" />
+        android:src="@drawable/ic_close_white" />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/lay_bottom"
         android:layout_width="match_parent"
@@ -40,16 +41,49 @@
         android:padding="10dp"
         >
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btn_save"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:contentDescription="@string/gallery_button_alt"
             android:padding="@dimen/spacing_small"
             android:scaleType="fitCenter"
+            android:src="@drawable/ic_save_start"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/btn_add_diary"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/anim_save_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/btn_add_diary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/loading_spinning_circle"
+            />
+
+        <ImageButton
+            android:id="@+id/btn_add_diary"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/gallery_button_alt"
+            android:padding="@dimen/spacing_small"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_add_diary"
+            android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/btn_save"
             app:layout_constraintTop_toTopOf="parent"
             />
 
